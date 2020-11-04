@@ -4,6 +4,7 @@ import requests
 from tqdm import tqdm
 
 import csv
+import shutil
 
 import fire
 
@@ -33,7 +34,11 @@ def download_dcms_with_website(download_pth, config_file):
     sheet_num = 0
     while continue_flag == True:
         try:
-            df = pd.read_excel(config_file, sheet_name = sheet_num, header = [0])
+            if config_file.endswith('.csv'):
+                df = pd.read_csv(config_file)
+                continue_flag = False
+            else:
+                df = pd.read_excel(config_file, sheet_name = sheet_num, header = [0])
             for i in tqdm(range(len(df))):
                 row = list(df.iloc[i,:].values)
                 download_dcm(download_pth, row[0], row[3])
@@ -79,7 +84,7 @@ def download_mha_with_csv(download_path, config_file):
     download_label(download_path, series_ids, urls)
 
 
-def get_series_uids(infile, column_name, outfile=None):
+def get_series_uids(infile, column_name='序列编号', outfile=None):
     '''
 
     note: 数仓在做标注的时候会导出一张标注的表格，用以记录序列和mask的对应关系。该函数的作用是根据这张表格，找到原始序列的uid。该uid后续需要获取内网地址进行下载。
@@ -95,6 +100,29 @@ def get_series_uids(infile, column_name, outfile=None):
         with open(outfile, 'w') as f:
             f.write('\n'.join(series_uids))
     return series_uids
+
+
+def rename_mask_files(indir, outdir, config_file):
+    '''
+    debug cmd: rename_mask_files('../../data/seg_task/masks', '../../data/seg_task/renamed_masks', '../../data/config_raw/image_anno_TASK_3491.csv')
+    invoke cmd: python download_utils.py rename_mask_files '../../data/seg_task/masks' '../../data/seg_task/renamed_masks' '../../data/config_raw/image_anno_TASK_3491.csv'
+    '''
+    os.makedirs(outdir, exist_ok=True)
+    df = pd.read_csv(config_file)
+    index_dict = {}
+    for index, row in df.iterrows():
+        series_uid = row['序列编号']
+        mask_name = row['影像结果编号']
+        if series_uid in index_dict:
+            cur_index = index_dict[series_uid]+1
+        else:
+            cur_index = 0
+        index_dict[series_uid] = cur_index
+        renamed_mask_name = '{}'.format(series_uid, cur_index)
+        src_file = os.path.join(indir, '{}.mha'.format(mask_name))
+        dst_file = os.path.join(outdir, '{}.mha'.format(renamed_mask_name))
+        shutil.copyfile(src_file, dst_file)
+        print('copy from {} to {}'.format(src_file, dst_file))
 
 
 if __name__ == '__main__':
