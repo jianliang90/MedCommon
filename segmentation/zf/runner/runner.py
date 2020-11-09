@@ -102,7 +102,7 @@ class SegmentationModel(BaseModel):
             total = 0
 
             for index, (images, masks) in enumerate(train_loader):
-                print(images.shape)
+                # print(images.shape)
                 if self.args.cuda:
                     images, masks = images.cuda(), masks.cuda()
 

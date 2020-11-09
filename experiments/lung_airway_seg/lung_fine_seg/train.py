@@ -7,15 +7,19 @@ import warnings
 current_dir = os.path.dirname(os.path.abspath(__file__))
 # sys.path.append("/fileser/zhangfan/LungProject/lung_segment/")
 seg_root_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), os.path.pardir, os.path.pardir, os.path.pardir)
+seg_zf_root_dir = os.path.join(seg_root_dir, 'segmentation', 'zf')
 print(seg_root_dir)
+print(seg_zf_root_dir)
 # sys.path.append("/fileser/zhangfan/LungProject/lung_segment/")
 sys.path.append(seg_root_dir)
+sys.path.append(seg_zf_root_dir)
 
 warnings.filterwarnings("ignore")
 
 import torch
 
 from network.unet import UNet
+# from network.unet_preprocess_deploy import UNet
 from runner.runner import SegmentationModel
 from runner.args import ModelOptions
 from data_processor.data_loader import DataSetLoader
@@ -24,6 +28,8 @@ from data_processor.data_loader import DataSetLoader
 # ---------------------------------------------Args config-------------------------------------------------- #
 net_config = {"num_class": 2,
               "nb_filter": [8, 16, 32, 64, 128],
+              "input_size":[224, 160, 224],
+              "clip_window":[-1200, 600],
               "use_checkpoint": False}
 
 args = ModelOptions("segmentation of lung").parse()

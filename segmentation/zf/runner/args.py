@@ -27,7 +27,7 @@ class ModelOptions:
         parser.add_argument('--out_dir', type=str, default='./output', help='output information is saved here')
 
         # optional parameter.
-        parser.add_argument('--mode', type=str, default='train', choices=('train', 'val', 'test'))
+        parser.add_argument('--mode', type=str, default='train', choices=('train', 'val', 'test', 'inference'))
         parser.add_argument('--network', type=str, default='Unet', choices=('UNet', 'Nested_UNet'))
         parser.add_argument('--activation', type=str, default="sigmoid", choices=('sigmoid', 'softmax'))
         parser.add_argument('--start_epoch', default=0, type=int, help='manual epoch number (useful on restarts)')
