@@ -17,7 +17,7 @@ class MaskBoundingUtils:
         else:
             data = DataIO.load_nii_image(infile)
         arr = data['image']
-        return extract_mask_arr_bounding(arr, is_print)
+        return MaskBoundingUtils.extract_mask_arr_bounding(arr, is_print)
     
     @staticmethod
     def extract_mask_arr_bounding(in_arr, is_print=False):
