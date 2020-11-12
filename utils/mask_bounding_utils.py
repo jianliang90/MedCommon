@@ -29,8 +29,8 @@ class MaskBoundingUtils:
             print('z ranges: [{}\t{}], len:\t{}'.format(z_min, z_max, z_max-z_min))
             print('y ranges: [{}\t{}], len:\t{}'.format(y_min, y_max, y_max-y_min))
             print('x ranges: [{}\t{}], len:\t{}'.format(x_min, x_max, x_max-x_min))
+            print('mask valid bounding shape:\t[{}, {}, {}]'.format(z_max-z_min, y_max-y_min, x_max-x_min))
         return z_min, y_min, x_min, z_max, y_max, x_max
-
 
 
 if __name__ == '__main__':
