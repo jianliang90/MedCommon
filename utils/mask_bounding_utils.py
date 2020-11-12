@@ -11,16 +11,16 @@ class MaskBoundingUtils:
         print('init MaskBoundingUtils class')
 
     @staticmethod
-    def extract_mask_bounding(infile, is_dcm=False, is_print=False):
+    def extract_mask_file_bounding(infile, is_dcm=False, is_print=False):
         if is_dcm:
             data = DataIO.load_dicom_series(infile)
         else:
             data = DataIO.load_nii_image(infile)
         arr = data['image']
-        return extract_mask_bounding(arr, is_print)
+        return extract_mask_arr_bounding(arr, is_print)
     
     @staticmethod
-    def extract_mask_bounding(in_arr, is_print=False):
+    def extract_mask_arr_bounding(in_arr, is_print=False):
         ranges = np.where(in_arr > 0)
         [z_min, y_min, x_min] = np.min(np.array(ranges), axis=1)
         [z_max, y_max, x_max] = np.max(np.array(ranges), axis=1)
