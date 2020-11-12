@@ -25,7 +25,7 @@ class MaskBoundingUtils:
         [z_min, y_min, x_min] = np.min(np.array(ranges), axis=1)
         [z_max, y_max, x_max] = np.max(np.array(ranges), axis=1)
         if is_print:
-            print('mask shape:\t', mask_arr.shape)
+            print('mask shape:\t', in_arr.shape)
             print('z ranges: [{}\t{}], len:\t{}'.format(z_min, z_max, z_max-z_min))
             print('y ranges: [{}\t{}], len:\t{}'.format(y_min, y_max, y_max-y_min))
             print('x ranges: [{}\t{}], len:\t{}'.format(x_min, x_max, x_max-x_min))
