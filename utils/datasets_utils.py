@@ -1,6 +1,8 @@
 import os
 import sys
 
+import numpy as np
+
 class DatasetsUtils:
     def __init__(self):
         pass
@@ -14,19 +16,21 @@ class DatasetsUtils:
         '''
         padding = 1
         [img_d, img_h, img_w] = [cropped_boundary[3]+padding, cropped_boundary[4]+padding, cropped_boundary[5]+padding]
-        [input_d, input_h, input_w] = size
+        [input_d, input_h, input_w] = crop_size
 
         z_min_upper = img_d - input_d
         y_min_upper = img_h - input_h
         x_min_upper = img_w - input_w
 
-        Z_min = np.random.randint(cropped_boundary.boundary_d_min, z_min_upper)
-        Y_min = np.random.randint(cropped_boundary.boundary_h_min, y_min_upper)
-        X_min = np.random.randint(cropped_boundary.boundary_w_min, x_min_upper)
+        Z_min = np.random.randint(cropped_boundary[0], z_min_upper)
+        Y_min = np.random.randint(cropped_boundary[1], y_min_upper)
+        X_min = np.random.randint(cropped_boundary[2], x_min_upper)
 
         Z_max = Z_min + input_d
         Y_max = Y_min + input_h
         X_max = X_min + input_w
+
+        return Z_min, Y_min, X_min, Z_max, Y_max, X_max
 
     @staticmethod
     def get_center_crop_boundary_3d(crop_size, cropped_boundary):
@@ -37,10 +41,10 @@ class DatasetsUtils:
         '''
         padding = 1
         [img_d, img_h, img_w] = [cropped_boundary[3]+padding, cropped_boundary[4]+padding, cropped_boundary[5]+padding]
-        center_d =  (cropped_boundary.[3] + cropped_boundary.[0]) // 2
-        center_h =  (cropped_boundary.[4] + cropped_boundary.[1]) // 2
-        center_w =  (cropped_boundary.[5] + cropped_boundary.[2]) // 2
-        [input_d, input_h, input_w] = size
+        center_d =  (cropped_boundary[3] + cropped_boundary[0]) // 2
+        center_h =  (cropped_boundary[4] + cropped_boundary[1]) // 2
+        center_w =  (cropped_boundary[5] + cropped_boundary[2]) // 2
+        [input_d, input_h, input_w] = crop_size
 
         Z_min = center_d-input_d//2
         Y_min = center_h-input_h//2
@@ -49,4 +53,6 @@ class DatasetsUtils:
         Z_max = Z_min + input_d
         Y_max = Y_min + input_h
         X_max = X_min + input_w
+
+        return Z_min, Y_min, X_min, Z_max, Y_max, X_max
 
