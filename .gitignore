@@ -12,6 +12,7 @@ output/
 *.nii.gz
 *.nii
 *.mha
+data
 
 
 # Distribution / packaging

@@ -13,13 +13,29 @@
             "console": "integratedTerminal",
             "cwd": "${fileDirname}",
             "env": {
-                // "CUDA_VISIBLE_DEVICES": "2"
+                "CUDA_VISIBLE_DEVICES": "2"
             },
             "args": [
-                "--gpu_ids", "2", 
-                "--weight_dir", "/home/zhangwd/code/work/MedCommon/experiments/lung_airway_seg/lung_fine_seg/output/lung_fine_seg/models_2020-11-09_14-41-04/models/model_014.pt",
-                "--mode", "inference"
+                "--gpu_ids", "0", 
+                "--weight_dir", "/home/zhangwd/code/work/MedCommon/experiments/lung_airway_seg/lung_fine_seg/output/lung_fine_seg/models_2020-11-09_14-41-04/models/model_136.pt",
+                "--mode", "inference", 
+                "--is_post_process", "True"
             ]
         },
+
+        {
+            "name": "common: airway coarse seg",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "cwd": "${fileDirname}",
+            "env": {
+                "CUDA_VISIBLE_DEVICES": "4"
+            },
+            "args": [
+                "--config", "../resources/train_config_dice.yaml"
+            ]
+        }
     ]
 }
