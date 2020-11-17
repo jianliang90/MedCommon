@@ -56,3 +56,42 @@ class DatasetsUtils:
 
         return Z_min, Y_min, X_min, Z_max, Y_max, X_max
 
+    @staticmethod
+    def expand_to_multiples_of_n(in_arr, n):
+        '''
+        n is multiples of 2
+        '''
+        [d,h,w] = in_arr.shape
+        new_d = ((d+n-1)//n) * n
+        new_h = ((h+n-1)//n) * n
+        new_w = ((w+n-1)//n) * n
+
+        new_arr = np.zeros([new_d, new_h, new_w], dtype=in_arr.dtype)
+
+        beg_d = new_d//2 - d//2
+        beg_h = new_h//2 - h//2
+        beg_w = new_w//2 - w//2
+        
+        new_arr[beg_d:beg_d+d, beg_h:beg_h+h, beg_w:beg_w+w] = in_arr
+
+        return new_arr  
+
+
+    def collapse_multiples_of_n(in_arr, ori_arr):
+        [d,h,w] = ori_arr.shape
+
+        new_d = ((d+n-1)//n) * n
+        new_h = ((h+n-1)//n) * n
+        new_w = ((w+n-1)//n) * n
+
+        assert [new_d, new_h, new_w] = in_arr.shape
+
+        beg_d = new_d//2 - d//2
+        beg_h = new_h//2 - h//2
+        beg_w = new_w//2 - w//2
+
+        new_arr = np.zeros([d, h, w], dtype=in_arr.dtype)
+
+        new_arr[:, :, :] = ori_arr[beg_d:beg_d+d, beg_h:beg_h+h, beg_w:beg_w+w]
+
+        return new_arr

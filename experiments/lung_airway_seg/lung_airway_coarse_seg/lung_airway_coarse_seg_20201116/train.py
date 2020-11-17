@@ -101,8 +101,9 @@ def inference(img_path, model_pth, out_dir, is_dcm=True):
     model.load_state_dict(torch.load(model_pth))
     model = torch.nn.DataParallel(model).cuda()
     model.eval()
-    output = model(image_tensor.cuda())
-    pred_mask = torch.nn.functional.sigmoid(output).argmax(1)    
+    with torch.no_grad():
+        output = model(image_tensor.cuda())
+    pred_mask = torch.sigmoid(output).argmax(1)    
     pred_mask_uint8 = np.array(pred_mask.detach().cpu().numpy(), np.uint8)
     pred_mask_uint8 = pred_mask_uint8[0]
     in_sitk_mask = sitk.GetImageFromArray(pred_mask_uint8)
@@ -111,6 +112,7 @@ def inference(img_path, model_pth, out_dir, is_dcm=True):
     os.makedirs(out_dir, exist_ok=True)
     sitk.WriteImage(sitk_img, os.path.join(out_dir, 'image_raw.nii.gz'))
     sitk.WriteImage(in_sitk_mask, os.path.join(out_dir, 'mask_pred.nii.gz'))
+
     print('hello world!')
 
 
