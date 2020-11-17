@@ -77,14 +77,14 @@ class DatasetsUtils:
         return new_arr  
 
     @staticmethod
-    def collapse_multiples_of_n(in_arr, ori_arr):
+    def collapse_multiples_of_n(in_arr, ori_arr, n):
         [d,h,w] = ori_arr.shape
 
         new_d = ((d+n-1)//n) * n
         new_h = ((h+n-1)//n) * n
         new_w = ((w+n-1)//n) * n
 
-        assert [new_d, new_h, new_w] == in_arr.shape
+        assert (new_d, new_h, new_w) == in_arr.shape
 
         beg_d = new_d//2 - d//2
         beg_h = new_h//2 - h//2
@@ -92,6 +92,6 @@ class DatasetsUtils:
 
         new_arr = np.zeros([d, h, w], dtype=in_arr.dtype)
 
-        new_arr[:, :, :] = ori_arr[beg_d:beg_d+d, beg_h:beg_h+h, beg_w:beg_w+w]
+        new_arr[:, :, :] = in_arr[beg_d:beg_d+d, beg_h:beg_h+h, beg_w:beg_w+w]
 
         return new_arr
