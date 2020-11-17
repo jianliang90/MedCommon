@@ -1,0 +1,3 @@
+[submodule "segmentation/external_lib/MedicalZooPytorch"]
+	path = segmentation/external_lib/MedicalZooPytorch
+	url = https://github.com/searobbersduck/MedicalZooPytorch.git
