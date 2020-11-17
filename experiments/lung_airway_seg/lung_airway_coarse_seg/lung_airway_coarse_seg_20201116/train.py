@@ -36,7 +36,7 @@ class Options():
         self.epochs = 100
         self.lr_fix = 50
         self.display = 2
-        self.model_dir = '../data/seg/model'
+        self.model_dir = './output/seg/model'
 
 
 def train_one_epoch(dataloader, model, criterion, optimizer, epoch, display, phase='train'):
@@ -82,8 +82,9 @@ def train_one_epoch(dataloader, model, criterion, optimizer, epoch, display, pha
 
 def inference(img_path, model_pth, out_dir, is_dcm=True):
     '''
-    debug cmd: inference('../data/seg/nii_file/1.3.12.2.1107.5.1.4.60320.30000015012900333934300003426/img.nii.gz', '../data/seg/model/cardiac_seg_train_0.013_val_0.020', '../data/seg/inference')
-    debug cmd: inference('/fileser/zhangwd/data/lung/changzheng/airway/airway_20201030/images/1.2.840.113704.1.111.10192.1571886399.11', '../data/seg/model/cardiac_seg_train_0.020_val_0.052', '../data/seg/inference')
+    debug cmd: inference('/fileser/zhangwd/data/lung/changzheng/airway/airway_20201030/images/1.2.840.113704.1.111.10192.1571886399.11', './airway_coarse_seg_train_0.020_val_0.052', './output/seg/inference')
+    invoke cmd: python train.py inference '/fileser/zhangwd/data/lung/changzheng/airway/airway_20201030/images/1.2.840.113704.1.111.10192.1571886399.11' './airway_coarse_seg_train_0.020_val_0.052' './output/seg/inference' True
+    invoke cmd: python train.py inference '/fileser/zhangwd/data/lung/LUNA/RAW_NII/1.3.6.1.4.1.14519.5.2.1.6279.6001.106164978370116976238911317774.nii.gz' './airway_coarse_seg_train_0.020_val_0.052' './output/seg/inference' False
     '''
     
     if is_dcm:
@@ -142,7 +143,7 @@ def main():
             best_loss = loss
             print('current best val loss is:\t{}'.format(best_loss))
             os.makedirs(opts.model_dir, exist_ok=True)
-            saved_model_path = os.path.join(opts.model_dir, 'cardiac_seg_train_{:.3f}_val_{:.3f}'.format(loss_train, loss))
+            saved_model_path = os.path.join(opts.model_dir, 'airway_coarse_seg_train_{:.3f}_val_{:.3f}'.format(loss_train, loss))
             torch.save(model.cpu().state_dict(), saved_model_path)
             print('====> save model:\t{}'.format(saved_model_path))
 
@@ -151,8 +152,8 @@ def main():
 
 
 if __name__ == '__main__':
-    # fire.Fire()
+    fire.Fire()
     # main()
     # inference('../data/seg/nii_file/1.3.12.2.1107.5.1.4.60320.30000015012900333934300003426/img.nii.gz', '../data/seg/model/cardiac_seg_train_0.013_val_0.020', '../data/seg/inference/test')
     # inference('../../data/changzheng/airway/airway_20201030/paires_croped_by_coarse_lung_seg/images/1.2.840.113704.1.111.10192.1571886399.11.nii.gz', '../data/seg/model/cardiac_seg_train_0.105_val_0.095', '../data/seg/inference/test')
-    inference('/fileser/zhangwd/data/lung/changzheng/airway/airway_20201030/images/1.2.840.113704.1.111.10192.1571886399.11', '../data/seg/model/cardiac_seg_train_0.020_val_0.052', '../data/seg/inference')
+    # inference('/fileser/zhangwd/data/lung/changzheng/airway/airway_20201030/images/1.2.840.113704.1.111.10192.1571886399.11', './airway_coarse_seg_train_0.020_val_0.052', './output/seg/inference')
