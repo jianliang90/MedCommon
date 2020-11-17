@@ -3,6 +3,4 @@
 
 
 ## 左右肺+支气管 粗分割
-![image.png](http://note.youdao.com/yws/res/3553/WEBRESOURCE16ed993f5bbb308fcb02897725b49546)
-
-
+具体文档见[肺和主气管粗分割模型](https://note.youdao.com/web/#/file/recent/markdown/WEB14878049fb022fde6ac01b1901fecb15/)
