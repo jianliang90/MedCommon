@@ -104,10 +104,12 @@ def inference(img_path, model_pth, out_dir, is_dcm=True):
     with torch.no_grad():
         output = model(image_tensor.cuda())
     # 如下这行代码，将sigmoid操作放在cpu端来做，是因为实际操作过程中，出现350x768x768这样的数据，导致显存爆炸
-    if image_arr.shape[2] > 512:
-        pred_mask = torch.sigmoid(output.detach().cpu()).argmax(1)    
-    else:
-        pred_mask = torch.sigmoid(output).argmax(1)    
+    # if image_arr.shape[2] > 512:
+    #     pred_mask = torch.sigmoid(output.detach().cpu()).argmax(1)    
+    # else:
+    #     pred_mask = torch.sigmoid(output).argmax(1)
+    pred_mask = torch.sigmoid(output.detach().cpu()).argmax(1) 
+    
     pred_mask_uint8 = np.array(pred_mask.detach().cpu().numpy(), np.uint8)
     pred_mask_uint8 = pred_mask_uint8[0]
     in_sitk_mask = sitk.GetImageFromArray(pred_mask_uint8)
