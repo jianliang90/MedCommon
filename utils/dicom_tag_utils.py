@@ -16,7 +16,7 @@ class DicomTagUtils:
         self.metadata = pydicom.dcmread(cur_dcm_file)
 
     @staticmethod
-    def load_metadata(seldicom_file, is_series=False, postfix='', min_dicom_nums=10):
+    def load_metadata(dicom_file, is_series=False, postfix='', min_dicom_nums=10):
         if is_series:
             dcm_files = glob(os.path.join(dicom_file, '*{}'.format(postfix)))
             dcm_files.sort()
@@ -51,6 +51,8 @@ class DicomTagUtils:
         basic_info['pid'] = pid
         basic_info['study_desc'] = study_desc
         basic_info['study_uid'] = study_uid
+
+        return basic_info
     
 
     @staticmethod
