@@ -72,11 +72,21 @@ class ImagePostProcessingUtils:
 
 
     @staticmethod
-    def extract_region_by_mask(sitk_image, sitk_mask, default_value=0):
-        maskfilter = sitk.MaskImageFilter()
+    def extract_region_by_mask(sitk_image, sitk_mask, default_value=0, mask_label=None):
+        
+        if mask_label is not None:
+            mask_arr = sitk.GetArrayFromImage(sitk_mask)
+            mask_arr[mask_arr != mask_label] = 0
+            mask_arr[mask_arr == mask_label] = 1
+            sitk_mask_new = sitk.GetImageFromArray(mask_arr)
+            sitk_mask_new.CopyInformation(sitk_mask)
+        else:
+            sitk_mask_new = sitk_mask
+
+        maskfilter = sitk.MaskImageFilter ()
         maskfilter.SetOutsideValue(default_value)
         src_img = sitk.Cast(sitk_image, sitk.sitkInt16)
-        mask_img = sitk.Cast(sitk_mask, sitk.sitkInt16)
+        mask_img = sitk.Cast(sitk_mask_new, sitk.sitkInt16)
         out_img = maskfilter.Execute(src_img, mask_img)
         out_img.CopyInformation(sitk_image)
         
@@ -106,14 +116,18 @@ def test_extract_region_by_mask():
 
     image_file = '/home/zhangwd/code/work/Lung_COPD/data/copd_400/registried_exp/1.3.12.2.1107.5.1.4.73793.30000017062123413576900064037/image_raw.nii.gz'
     mask_file = '/home/zhangwd/code/work/Lung_COPD/data/copd_400/registried_exp/1.3.12.2.1107.5.1.4.73793.30000017062123413576900064037/mask_pred.nii.gz'
-
-    sitk_image = sitk.ReadImage(image_file)
-    sitk_mask = sitk.ReadImage(mask_file)
-    extracted_image = ImagePostProcessingUtils.extract_region_by_mask(sitk_image, sitk_mask)
-
     out_dir = './tmp_out'
     os.makedirs(out_dir, exist_ok=True)
-    out_file = os.path.join(out_dir, 'test_extract_region_by_mask.nii.gz')
+    
+    sitk_image = sitk.ReadImage(image_file)
+    sitk_mask = sitk.ReadImage(mask_file)
+
+    extracted_image = ImagePostProcessingUtils.extract_region_by_mask(sitk_image, sitk_mask, mask_label=1)
+    out_file = os.path.join(out_dir, 'test_extract_region_by_mask_1.nii.gz')
+    sitk.WriteImage(extracted_image, out_file)
+
+    extracted_image = ImagePostProcessingUtils.extract_region_by_mask(sitk_image, sitk_mask, mask_label=2)
+    out_file = os.path.join(out_dir, 'test_extract_region_by_mask_2.nii.gz')
     sitk.WriteImage(extracted_image, out_file)
 
     end = time.time()
