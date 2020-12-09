@@ -71,6 +71,16 @@ class ImagePostProcessingUtils:
         return out_mask_sitk
 
 
+    @staticmethod
+    def extract_region_by_mask(sitk_image, sitk_mask, default_value=0):
+        maskfilter = sitk.MaskImageFilter()
+        maskfilter.SetOutsideValue(default_value)
+        src_img = sitk.Cast(sitk_image, sitk.sitkInt16)
+        mask_img = sitk.Cast(sitk_mask, sitk.sitkInt16)
+        out_img = maskfilter.Execute(src_img, mask_img)
+        out_img.CopyInformation(sitk_image)
+        
+        return out_img
 
 
 def test_get_maximal_connected_region_multilabel():
@@ -90,7 +100,29 @@ def test_get_maximal_connected_region_multilabel():
     print('====> test_get_maximal_connected_region_multilabel time elapsed:\t{:.3f}s'.format(end-beg))
 
 
+def test_extract_region_by_mask():
+
+    beg = time.time()
+
+    image_file = '/home/zhangwd/code/work/Lung_COPD/data/copd_400/registried_exp/1.3.12.2.1107.5.1.4.73793.30000017062123413576900064037/image_raw.nii.gz'
+    mask_file = '/home/zhangwd/code/work/Lung_COPD/data/copd_400/registried_exp/1.3.12.2.1107.5.1.4.73793.30000017062123413576900064037/mask_pred.nii.gz'
+
+    sitk_image = sitk.ReadImage(image_file)
+    sitk_mask = sitk.ReadImage(mask_file)
+    extracted_image = ImagePostProcessingUtils.extract_region_by_mask(sitk_image, sitk_mask)
+
+    out_dir = './tmp_out'
+    os.makedirs(out_dir, exist_ok=True)
+    out_file = os.path.join(out_dir, 'test_extract_region_by_mask.nii.gz')
+    sitk.WriteImage(extracted_image, out_file)
+
+    end = time.time()
+
+    print('====> test_extract_region_by_mask time elapsed:\t{:.3f}s'.format(end-beg))
+
+
 if __name__ == '__main__':
-    test_get_maximal_connected_region_multilabel()
+    # test_get_maximal_connected_region_multilabel()
+    test_extract_region_by_mask()
     
 
