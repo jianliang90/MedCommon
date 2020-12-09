@@ -8,6 +8,8 @@ from glob import glob
 
 import SimpleITK as sitk
 
+import time
+
 COMMON_ROOT = os.path.join(os.path.dirname(__file__), os.path.pardir)
 sys.path.append(COMMON_ROOT)
 
@@ -67,7 +69,7 @@ class DatasetsUtils:
         return Z_min, Y_min, X_min, Z_max, Y_max, X_max
 
     @staticmethod
-    def expand_to_multiples_of_n(in_arr, n):
+    def expand_to_multiples_of_n(in_arr, n, full_val=0):
         '''
         n is multiples of 2
         '''
@@ -76,7 +78,7 @@ class DatasetsUtils:
         new_h = ((h+n-1)//n) * n
         new_w = ((w+n-1)//n) * n
 
-        new_arr = np.zeros([new_d, new_h, new_w], dtype=in_arr.dtype)
+        new_arr = np.full([new_d, new_h, new_w], full_val, dtype=in_arr.dtype)
 
         beg_d = new_d//2 - d//2
         beg_h = new_h//2 - h//2
@@ -106,8 +108,12 @@ class DatasetsUtils:
 
         return new_arr
 
+
     @staticmethod
-    def resample_image_unified_resolution(image, dst_size, interpolation_mode=sitk.sitkNearestNeighbor):
+    def resample_image_unsame_resolution(image, dst_size, interpolation_mode=sitk.sitkNearestNeighbor):
+        '''
+        该函数并没有统一分辨率。。。
+        '''
         img = image
         # print(img.GetSize(), img.GetSpacing())
         
@@ -128,16 +134,29 @@ class DatasetsUtils:
         resampler.SetSize(dst_size)
 
         img_res = resampler.Execute(img)
-        # print(img_res.GetSize(), img_res.GetSpacing())
-        img_res_arr = sitk.GetArrayFromImage(img_res)
-        # print(img_res_arr.shape, np.max(img_res_arr), np.min(img_res_arr))
 
-        new_img_sitk = sitk.GetImageFromArray(img_res_arr)
+        return img_res
 
-        return new_img_sitk
 
     @staticmethod
-    def resample_image_mask_unified_resolution_onecase(image_file, mask_file, dst_image_file, dst_mask_file, dst_size, is_dcm=False):
+    def restore_ori_image_from_resampled_image(resampled_image, ori_ref_image, interpolation_mode=sitk.sitkNearestNeighbor):
+        '''
+
+        '''
+        resampler = sitk.ResampleImageFilter()
+        resampler.SetInterpolator(sitk.sitkNearestNeighbor)
+        resampler.SetOutputDirection(ori_ref_image.GetDirection())
+        resampler.SetOutputOrigin(ori_ref_image.GetOrigin())
+        resampler.SetOutputSpacing(ori_ref_image.GetSpacing())
+        resampler.SetSize(ori_ref_image.GetSize())
+        img_res = resampler.Execute(resampled_image)
+
+        return img_res
+
+        
+
+    @staticmethod
+    def resample_image_mask_unsame_resolution_onecase(image_file, mask_file, dst_image_file, dst_mask_file, dst_size, is_dcm=False):
         if is_dcm:
             image_data = DataIO.load_dicom_series(image_file)
         else:
@@ -145,8 +164,8 @@ class DatasetsUtils:
 
         mask_data = DataIO.load_nii_image(mask_file)
         
-        resampled_image = DatasetsUtils.resample_image_unified_resolution(image_data['sitk_image'], dst_size)
-        resampled_mask = DatasetsUtils.resample_image_unified_resolution(mask_data['sitk_image'], dst_size)
+        resampled_image = DatasetsUtils.resample_image_unsame_resolution(image_data['sitk_image'], dst_size)
+        resampled_mask = DatasetsUtils.resample_image_unsame_resolution(mask_data['sitk_image'], dst_size)
 
         os.makedirs(os.path.dirname(dst_image_file), exist_ok=True)
         os.makedirs(os.path.dirname(dst_mask_file), exist_ok=True)
@@ -154,7 +173,7 @@ class DatasetsUtils:
         sitk.WriteImage(resampled_mask, dst_mask_file)
 
     @staticmethod
-    def resample_image_mask_unified_resolution_singletask(series_uids, image_root, mask_root, 
+    def resample_image_mask_unsame_resolution_singletask(series_uids, image_root, mask_root, 
             dst_image_root, dst_mask_root, dst_size, 
             image_postfix='', mask_postfix='', 
             is_dcm=False):
@@ -168,11 +187,11 @@ class DatasetsUtils:
             dst_image_file = os.path.join(dst_image_root, '{}.nii.gz'.format(series_uid))
             dst_mask_file = os.path.join(dst_mask_root, '{}.nii.gz'.format(series_uid))
 
-            DatasetsUtils.resample_image_mask_unified_resolution_onecase(image_file, mask_file, dst_image_file, dst_mask_file, dst_size, is_dcm)
+            DatasetsUtils.resample_image_mask_unsame_resolution_onecase(image_file, mask_file, dst_image_file, dst_mask_file, dst_size, is_dcm)
             
 
     @staticmethod
-    def resample_image_mask_unified_resolution_multiprocess(image_root, mask_root, 
+    def resample_image_mask_unsame_resolution_multiprocess(image_root, mask_root, 
             dst_image_root, dst_mask_root, dst_size, 
             image_postfix='', mask_postfix='', 
             process_num=12, is_dcm=False):
@@ -189,7 +208,7 @@ class DatasetsUtils:
         num_per_process = (len(series_uids) + process_num - 1)//process_num
 
         # this for single thread to debug
-        # DatasetsUtils.resample_image_mask_unified_resolution_singletask(series_uids, image_root, mask_root, 
+        # DatasetsUtils.resample_image_mask_unsame_resolution_singletask(series_uids, image_root, mask_root, 
         #                 dst_image_root, dst_mask_root, dst_size, 
         #                 image_postfix, mask_postfix, 
         #                 is_dcm)
@@ -207,7 +226,7 @@ class DatasetsUtils:
         for i in range(process_num):
             sub_series_uids = series_uids[num_per_process*i:min(num_per_process*(i+1), len(series_uids))]
             print(len(sub_series_uids))
-            result = pool.apply_async(DatasetsUtils.resample_image_mask_unified_resolution_singletask, 
+            result = pool.apply_async(DatasetsUtils.resample_image_mask_unsame_resolution_singletask, 
                 args=(sub_series_uids, image_root, mask_root, 
                         dst_image_root, dst_mask_root, dst_size, 
                         image_postfix, mask_postfix, 
@@ -270,59 +289,85 @@ class DatasetsUtils:
 
 
 
-def test_resample_image_mask_unified_resolution_multiprocess():
+def test_resample_image_mask_unsame_resolution_multiprocess():
     
     '''
     我就是个分割线，下面的是心脏腔室的处理
     '''
 
-    # image_root = '/fileser/zhangwd/data/cardiac/chamber/seg/chamber_seg/images'
-    # mask_root = '/fileser/zhangwd/data/cardiac/chamber/seg/chamber_seg/masks'
+    image_root = '/fileser/zhangwd/data/cardiac/chamber/seg/chamber_seg/images'
+    mask_root = '/fileser/zhangwd/data/cardiac/chamber/seg/chamber_seg/masks'
 
-    # dst_image_root = '/fileser/zhangwd/data/cardiac/chamber/seg/chamber_seg_resampled_unified/images'
-    # dst_mask_root = '/fileser/zhangwd/data/cardiac/chamber/seg/chamber_seg_resampled_unified/masks'
+    dst_image_root = '/fileser/zhangwd/data/cardiac/chamber/seg/chamber_seg_resampled_unified/images'
+    dst_mask_root = '/fileser/zhangwd/data/cardiac/chamber/seg/chamber_seg_resampled_unified/masks'
 
-    # dst_size = [128, 128, 128]
+    dst_size = [128, 128, 128]
 
-    # image_postfix = '.nii.gz'
-    # mask_postfix = '.nii.gz'
+    image_postfix = '.nii.gz'
+    mask_postfix = '.nii.gz'
 
-    # process_num=12
+    process_num=12
 
-    # is_dcm = False
+    is_dcm = False
 
-    # DatasetsUtils.resample_image_mask_unified_resolution_multiprocess(
-    #     image_root, mask_root, 
-    #     dst_image_root, dst_mask_root, dst_size, 
-    #     image_postfix, mask_postfix, process_num, is_dcm)
+    DatasetsUtils.resample_image_mask_unsame_resolution_multiprocess(
+        image_root, mask_root, 
+        dst_image_root, dst_mask_root, dst_size, 
+        image_postfix, mask_postfix, process_num, is_dcm)
 
 
     '''
     我就是个分割线，下面的是心包的处理
     '''
 
-    image_root = '/fileser/zhangwd/data/cardiac/seg/heart_hub/images'
-    mask_root = '/fileser/zhangwd/data/cardiac/seg/heart_hub/renamed_masks'
+    # image_root = '/fileser/zhangwd/data/cardiac/seg/heart_hub/images'
+    # mask_root = '/fileser/zhangwd/data/cardiac/seg/heart_hub/renamed_masks'
 
-    dst_image_root = '/fileser/zhangwd/data/cardiac/seg/heart_hub/resampled_unified_128/images'
-    dst_mask_root = '/fileser/zhangwd/data/cardiac/seg/heart_hub/resampled_unified_128/masks'
+    # dst_image_root = '/fileser/zhangwd/data/cardiac/seg/heart_hub/resampled_unified_128/images'
+    # dst_mask_root = '/fileser/zhangwd/data/cardiac/seg/heart_hub/resampled_unified_128/masks'
 
-    dst_size = [128, 128, 128]
+    # dst_size = [128, 128, 128]
 
-    image_postfix = ''
-    mask_postfix = '.mha'
+    # image_postfix = ''
+    # mask_postfix = '.mha'
 
-    process_num=12
+    # process_num=12
 
-    is_dcm = True
+    # is_dcm = True
 
-    DatasetsUtils.resample_image_mask_unified_resolution_multiprocess(
-        image_root, mask_root, 
-        dst_image_root, dst_mask_root, dst_size, 
-        image_postfix, mask_postfix, process_num, is_dcm)
+    # DatasetsUtils.resample_image_mask_unsame_resolution_multiprocess(
+    #     image_root, mask_root, 
+    #     dst_image_root, dst_mask_root, dst_size, 
+    #     image_postfix, mask_postfix, process_num, is_dcm)
 
+def test_restore_ori_image_from_resampled_image():
+    '''
+    我就是个分割线，下面的是: 利用小分辨率的（等分辨率）模型将心脏进行分割，
+    并将风格后的心脏mask恢复到原图一样的大小
+    '''
+    mask_file = '/fileser/zhangwd/data/cardiac/chamber/seg/chamber_seg_resampled_unified/masks/1.3.12.2.1107.5.1.4.60320.30000015020300202700000017926.nii.gz'
+    ref_image_file = '/fileser/zhangwd/data/cardiac/chamber/seg/chamber_seg/images/1.3.12.2.1107.5.1.4.60320.30000015020300202700000017926.nii.gz'
+    ref_mask_file = '/fileser/zhangwd/data/cardiac/chamber/seg/chamber_seg/masks/1.3.12.2.1107.5.1.4.60320.30000015020300202700000017926.nii.gz'
+
+    resample_mask = sitk.ReadImage(mask_file)
+    ori_ref_image = sitk.ReadImage(ref_image_file)
+    ori_ref_mask = sitk.ReadImage(ref_mask_file)
+
+    # resample_mask = DatasetsUtils.resample_image_unsame_resolution(ori_ref_mask, [128, 128, 128])
+
+    restored_mask = DatasetsUtils.restore_ori_image_from_resampled_image(resample_mask, ori_ref_image)
+
+    tmp_out_dir = './tmp_out'
+    os.makedirs(tmp_out_dir, exist_ok=True)
+    out_restored_mask_file = os.path.join(tmp_out_dir, 'restored_mask.nii.gz')
+    out_ref_image_file = os.path.join(tmp_out_dir, 'ref_image.nii.gz')
+    out_ref_mask_file = os.path.join(tmp_out_dir, 'ref_mask.nii.gz')
+    sitk.WriteImage(restored_mask, out_restored_mask_file)
+    sitk.WriteImage(ori_ref_image, out_ref_image_file)
+    sitk.WriteImage(ori_ref_mask, out_ref_mask_file)
 
 
 if __name__ == '__main__':
-    test_resample_image_mask_unified_resolution_multiprocess()
+    # test_resample_image_mask_unsame_resolution_multiprocess()
+    test_restore_ori_image_from_resampled_image()
 

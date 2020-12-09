@@ -22,6 +22,7 @@ from torch.autograd import Variable
 import torch.optim as optim
 from torch.utils.data import DataLoader
 from utils.misc_utils import AverageMeter
+from utils.datasets_utils import DatasetsUtils
 import time
 from tqdm import tqdm
 
@@ -78,5 +79,31 @@ class SegmentationTrainer:
         sitk.WriteImage(image_sitk, 'image_{}.nii.gz'.format(epoch))
         return losses.avg, logger
 
-    
+    @staticmethod
+    def inference_one_case(model, series_path, is_dcm=True, dst_size = [128, 128, 128]):
+        # 注意在处理分割模型时，模型的模式model.eval()，和模型训练时一致
+        model.eval()
+
+        if is_dcm:
+            image_data = DataIO.load_dicom_series(series_path)
+        else:
+            image_data = DataIO.load_nii_image(series_path)
+        image = image_data['sitk_image']
+        # dst_size = [128, 128, 128]
+        resampled_image = DatasetsUtils.resample_image_unsame_resolution(image, dst_size, sitk.sitkLinear)
+        resampled_image_arr = sitk.GetArrayFromImage(resampled_image)
+        resampled_image_tensor = torch.from_numpy(resampled_image_arr).unsqueeze(0).unsqueeze(0).float()
+        output = model(resampled_image_tensor.cuda())
+
+        pred_mask = torch.nn.functional.sigmoid(output).argmax(1)    
+        pred_mask_uint8 = np.array(pred_mask.detach().cpu().numpy(), np.uint8)
+        pred_mask_uint8 = pred_mask_uint8[0]
+        pred_sitk_mask = sitk.GetImageFromArray(pred_mask_uint8)
+        pred_sitk_mask.CopyInformation(resampled_image)
+
+        ori_pred_sitk_mask = DatasetsUtils.restore_ori_image_from_resampled_image(pred_sitk_mask, image)
+        
+        ori_pred_sitk_mask.CopyInformation(image)
+
+        return image, ori_pred_sitk_mask
 

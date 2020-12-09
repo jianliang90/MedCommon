@@ -81,6 +81,39 @@ def main():
             print('====> save model:\t{}'.format(saved_model_path))
 
 
+def inference():
+    out_dir = './tmp_out'
+    os.makedirs(out_dir, exist_ok=True)
+
+    model_pth = './common_seg_train_0.030_val_0.055'
+    series_path = '/home/proxima-sx12/data/data_category/NEWCTA/1315171/DS_CorAdSeq  0.75  Bv40  3  BestSyst 44 %'
+    basename = os.path.basename(os.path.dirname(series_path))
+    out_image_file = os.path.join(out_dir, '{}_image.nii.gz'.format(basename))
+    out_mask_file = os.path.join(out_dir, '{}_mask_pred.nii.gz'.format(basename))
+
+    num_classes = 8
+    model = ResampledUnet3D(1, num_classes)
+    model.load_state_dict(torch.load(model_pth))
+    model = torch.nn.DataParallel(model).cuda()
+    model.eval()
+    image, pred_mask = SegmentationTrainer.inference_one_case(model, series_path, is_dcm=True)
+
+    sitk.WriteImage(image, out_image_file)
+    sitk.WriteImage(pred_mask, out_mask_file)
+
+
+    series_path = '/home/proxima-sx12/data/data_category/NEWMIP/1315171'
+    basename = os.path.basename(os.path.dirname(series_path))
+    out_image_file = os.path.join(out_dir, '{}_mip_image.nii.gz'.format(basename))
+    out_mask_file = os.path.join(out_dir, '{}_mip_mask_pred.nii.gz'.format(basename))
+
+    image, pred_mask = SegmentationTrainer.inference_one_case(model, series_path, is_dcm=True)
+
+    sitk.WriteImage(image, out_image_file)
+    sitk.WriteImage(pred_mask, out_mask_file)
+
+
 if __name__ == '__main__':
     # DatasetsUtils.split_ds(os.path.join(seg_root, 'images'), os.path.join(seg_root, 'config'))
-    main()
+    # main()
+    inference()
