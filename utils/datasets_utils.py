@@ -110,12 +110,13 @@ class DatasetsUtils:
 
 
     @staticmethod
-    def cut_image_into_blocks_by_sliding_window(sitk_image, crop_size, overlap=[0,0,0]):
+    def cut_image_into_blocks_by_sliding_window(image_arr, crop_size, overlap=[0,0,0]):
         '''
         将3d图像按照滑窗的方式，切割成crop_size的大小
         todo: 暂时未提供overlap的版本
         '''      
-        src_data = sitk.GetArrayFromImage(sitk_image)
+        # src_data = sitk.GetArrayFromImage(sitk_image)
+        src_data = image_arr
 
         # padding to 32xn/Nxn
         padding = 32
@@ -427,8 +428,9 @@ def test_cut_image_into_blocks_by_sliding_window():
     beg = time.time()
     infile = '/fileser/zhangwd/data/lung/changzheng/airway/airway_20201030/pred_masks/1.2.840.113704.1.111.10192.1571886399.11/coarse_lung/cropped_image.nii.gz'
     image = sitk.ReadImage(infile)
+    image_arr = sitk.GetArrayFromImage(image)
     crop_size = [128, 128, 128]
-    cropped_arrs, d_cnt, h_cnt, w_cnt = DatasetsUtils.cut_image_into_blocks_by_sliding_window(image, crop_size)
+    cropped_arrs, d_cnt, h_cnt, w_cnt = DatasetsUtils.cut_image_into_blocks_by_sliding_window(image_arr, crop_size)
     ori_size = list(image.GetSize())[::-1]
     composed_arr = DatasetsUtils.compose_blocks_cutted_by_sliding_window_into_image(cropped_arrs, [d_cnt, h_cnt, w_cnt], crop_size, ori_size)
     composed_image = sitk.GetImageFromArray(composed_arr)
