@@ -110,6 +110,63 @@ class DatasetsUtils:
 
 
     @staticmethod
+    def cut_image_into_blocks_by_sliding_window(sitk_image, crop_size, overlap=[0,0,0]):
+        '''
+        将3d图像按照滑窗的方式，切割成crop_size的大小
+        todo: 暂时未提供overlap的版本
+        '''      
+        src_data = sitk.GetArrayFromImage(sitk_image)
+
+        # padding to 32xn/Nxn
+        padding = 32
+        [pd, ph, pw] = crop_size
+        [d,h,w] = src_data.shape
+        new_d = ((d+pd-1)//pd)*pd
+        new_h = ((h+ph-1)//ph)*ph
+        new_w = ((w+pw-1)//pw)*pw
+
+        if not np.all([d,h,w]==np.array([new_d, new_h, new_w])):
+            new_arr = np.zeros([new_d, new_h, new_w])
+            new_arr[:d,:h,:w] = src_data
+        else:
+            new_arr = src_data
+
+        cropped_srcs = []
+        d_cnt = (d+pd-1)//pd
+        h_cnt = (h+ph-1)//ph
+        w_cnt = (w+pw-1)//pw
+        for iz in range(d_cnt):
+            for iy in range(h_cnt):
+                for ix in range(w_cnt):
+                    cropped_src = new_arr[iz*pd:(iz+1)*pd, iy*ph:(iy+1)*ph, ix*pw:(ix+1)*pw]
+                    # cropped_src = torch.from_numpy(cropped_src).float()
+                    # cropped_src = torch.unsqueeze(cropped_src, axis=0)
+                    # cropped_src = torch.unsqueeze(cropped_src, axis=0)
+                    cropped_srcs.append(cropped_src)
+        
+        return cropped_srcs, d_cnt, h_cnt, w_cnt
+
+
+    @staticmethod
+    def compose_blocks_cutted_by_sliding_window_into_image(arr, blocks_dim, crop_size, ori_size, overlay=[0, 0, 0]):
+        '''
+        将3d图像按照滑窗的方式，切割成crop_size的大小后，组装成完整的图像
+        todo: 暂时未提供overlap的版本
+        '''
+        assert len(arr) == blocks_dim[0] * blocks_dim[1] * blocks_dim[2]
+        dim = np.array(blocks_dim)*np.array(crop_size)
+        dst_arr = np.zeros(dim)
+        [d_cnt, h_cnt, w_cnt] = blocks_dim
+        [pd, ph, pw] = crop_size
+        for iz in range(d_cnt):
+            for iy in range(h_cnt):
+                for ix in range(w_cnt):
+                    dst_arr[iz*pd:(iz+1)*pd, iy*ph:(iy+1)*ph, ix*pw:(ix+1)*pw] = arr[iz*h_cnt*w_cnt+iy*w_cnt+ix]
+        return dst_arr[:ori_size[0], :ori_size[1], :ori_size[2]]
+    
+
+
+    @staticmethod
     def resample_image_unsame_resolution(image, dst_size, interpolation_mode=sitk.sitkNearestNeighbor):
         '''
         该函数并没有统一分辨率。。。
@@ -366,8 +423,29 @@ def test_restore_ori_image_from_resampled_image():
     sitk.WriteImage(ori_ref_image, out_ref_image_file)
     sitk.WriteImage(ori_ref_mask, out_ref_mask_file)
 
+def test_cut_image_into_blocks_by_sliding_window():
+    beg = time.time()
+    infile = '/fileser/zhangwd/data/lung/changzheng/airway/airway_20201030/pred_masks/1.2.840.113704.1.111.10192.1571886399.11/coarse_lung/cropped_image.nii.gz'
+    image = sitk.ReadImage(infile)
+    crop_size = [128, 128, 128]
+    cropped_arrs, d_cnt, h_cnt, w_cnt = DatasetsUtils.cut_image_into_blocks_by_sliding_window(image, crop_size)
+    ori_size = list(image.GetSize())[::-1]
+    composed_arr = DatasetsUtils.compose_blocks_cutted_by_sliding_window_into_image(cropped_arrs, [d_cnt, h_cnt, w_cnt], crop_size, ori_size)
+    composed_image = sitk.GetImageFromArray(composed_arr)
+    composed_image.CopyInformation(image)
+    
+    out_dir = './tmp_out'
+    os.makedirs(out_dir, exist_ok=True)
+    outfile = os.path.join(out_dir, 'test_cut_image_into_blocks_by_sliding_window.nii.gz')
+
+    sitk.WriteImage(composed_image, outfile)
+
+    end = time.time()
+    print('====> test_cut_image_into_blocks_by_sliding_window time elapsed:\t{:.3f}s'.format(end-beg))
+    
 
 if __name__ == '__main__':
     # test_resample_image_mask_unsame_resolution_multiprocess()
-    test_restore_ori_image_from_resampled_image()
+    # test_restore_ori_image_from_resampled_image()
+    test_cut_image_into_blocks_by_sliding_window()
 
