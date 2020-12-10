@@ -110,6 +110,95 @@ class DatasetsUtils:
 
 
     @staticmethod
+    def extend_image_mask_boundary_for_seg(image_arr, mask_arr, dst_size, boundary_value=0):
+        '''
+        1. 确保图像的边界(image_arr.shape)<=要扩展的边界（dst_size）
+        '''
+        assert image_arr.shape == mask_arr.shape
+        if image_arr.shape == dst_size:
+            return image_arr, mask_arr
+        
+        z_min_upper = dst_size[0] - image_arr.shape[0]
+        y_min_upper = dst_size[1] - image_arr.shape[1]
+        x_min_upper = dst_size[2] - image_arr.shape[2]
+
+        z_min = np.random.randint(0, z_min_upper) if 0 < z_min_upper else 0
+        y_min = np.random.randint(0, y_min_upper) if 0 < y_min_upper else 0
+        x_min = np.random.randint(0, x_min_upper) if 0 < x_min_upper else 0
+
+        z_max = z_min + image_arr.shape[0]
+        y_max = y_min + image_arr.shape[1]
+        x_max = x_min + image_arr.shape[2]
+
+        image_arr_new = np.full(dst_size, boundary_value, dtype=image_arr.dtype)
+        mask_arr_new = np.full(dst_size, 0, dtype=mask_arr.dtype)
+
+        image_arr_new[z_min:z_max, y_min:y_max, x_min:x_max] = image_arr[:,:,:]
+        mask_arr_new[z_min:z_max, y_min:y_max, x_min:x_max] = mask_arr[:,:,:]
+
+        return image_arr_new, mask_arr_new
+
+    @staticmethod
+    def crop_image_mask_with_padding(image_arr, mask_arr, dst_size, boundary_value=0):
+        '''
+        1.将图像扩展成dst_size的倍数，再进行随机crop操作
+        '''
+        assert image_arr.shape == mask_arr.shape
+        if image_arr.shape == dst_size:
+            return image_arr, mask_arr
+
+        new_size = []
+        for i in range(3):
+            new_size.append(((image_arr.shape[i]+dst_size[i]-1)//dst_size[i])*dst_size[i])
+
+        new_image_arr = np.full(new_size, boundary_value, dtype=image_arr.dtype)
+        new_mask_arr = np.full(new_size, 0, dtype=mask_arr.dtype)
+
+        new_d, new_h, new_w = new_size
+        d,h,w = image_arr.shape
+
+        beg_d = new_d//2 - d//2
+        beg_h = new_h//2 - h//2
+        beg_w = new_w//2 - w//2
+        
+        new_image_arr[beg_d:beg_d+d, beg_h:beg_h+h, beg_w:beg_w+w] = image_arr
+        new_mask_arr[beg_d:beg_d+d, beg_h:beg_h+h, beg_w:beg_w+w] = mask_arr
+
+        z_lower_min = np.random.randint(0, beg_d) if 0 < beg_d else 0
+        y_lower_min = np.random.randint(0, beg_h) if 0 < beg_h else 0
+        x_lower_min = np.random.randint(0, beg_w) if 0 < beg_w else 0
+
+        z_upper_min = np.random.randint(beg_d+d-dst_size[0], new_d-dst_size[0]) if beg_d+d-dst_size[0] < new_d-dst_size[0] else beg_d+d-dst_size[0]
+        y_upper_min = np.random.randint(beg_h+h-dst_size[1], new_h-dst_size[1]) if beg_h+h-dst_size[1] < new_h-dst_size[1] else beg_h+h-dst_size[1]
+        x_upper_min = np.random.randint(beg_w+w-dst_size[2], new_w-dst_size[2]) if beg_w+w-dst_size[2] < new_w-dst_size[2] else beg_w+w-dst_size[2]
+
+        z_upper_min = max(z_lower_min, 0)
+        y_upper_min = max(y_lower_min, 0)
+        x_upper_min = max(x_lower_min, 0)
+
+        z_min = np.random.choice([z_lower_min, z_upper_min])
+        y_min = np.random.choice([y_lower_min, y_upper_min])
+        x_min = np.random.choice([x_lower_min, x_upper_min])
+
+        z_min = z_min if d > dst_size[0] else 0
+        y_min = y_min if h > dst_size[1] else 0
+        x_min = x_min if w > dst_size[2] else 0
+
+        z_max = z_min + dst_size[0]
+        y_max = y_min + dst_size[1]
+        x_max = x_min + dst_size[2]
+
+        # cropped_image = new_image_arr[z_min:z_max, y_min:y_max, x_min:x_max]
+        # cropped_mask = new_mask_arr[z_min:z_max, y_min:y_max, x_min:x_max]
+        # print(dst_size)
+        # assert list(cropped_image.shape) == dst_size
+        # print('{}\t{}\t{}\t{}\t{}\t{}'.format(z_min, z_max, y_min, y_max, x_min, x_max))
+
+        return new_image_arr[z_min:z_max, y_min:y_max, x_min:x_max], new_mask_arr[z_min:z_max, y_min:y_max, x_min:x_max]
+        
+
+
+    @staticmethod
     def cut_image_into_blocks_by_sliding_window(image_arr, crop_size, overlap=[0,0,0]):
         '''
         将3d图像按照滑窗的方式，切割成crop_size的大小
@@ -445,9 +534,92 @@ def test_cut_image_into_blocks_by_sliding_window():
     end = time.time()
     print('====> test_cut_image_into_blocks_by_sliding_window time elapsed:\t{:.3f}s'.format(end-beg))
     
+def test_extend_image_mask_boundary_for_seg():
+    beg = time.time()
+    image_file = '/fileser/zhangwd/data/lung/changzheng/airway/airway_20201030/paires_croped_by_coarse_lung_seg/images/1.2.840.113704.1.111.10192.1571886399.11.nii.gz'
+    mask_file = '/fileser/zhangwd/data/lung/changzheng/airway/airway_20201030/paires_croped_by_coarse_lung_seg/masks/1.2.840.113704.1.111.10192.1571886399.11.nii.gz'
+
+    out_dir = './tmp_out/test_extend_image_mask_boundary_for_seg'
+    os.makedirs(out_dir, exist_ok=True)
+
+    sitk_image = sitk.ReadImage(image_file)
+    image_arr = sitk.GetArrayFromImage(sitk_image)
+    sitk_mask = sitk.ReadImage(mask_file)
+    mask_arr = sitk.GetArrayFromImage(sitk_mask)
+    for i in tqdm(range(10)):
+        out_image_file = os.path.join(out_dir, 'image_{}.nii.gz'.format(i))
+        out_mask_file = os.path.join(out_dir, 'mask_{}.nii.gz'.format(i))
+        dst_size = [128, 128, 128]
+        padding = [np.random.randint(0,5), np.random.randint(0,5), np.random.randint(0,5)]
+        crop_size = []
+        for i in range(3):
+            crop_size.append(dst_size[i] - padding[i])
+        
+        # 随机取数据
+        cropped_boundary = [0,0,0, image_arr.shape[0]-1, image_arr.shape[1]-1, image_arr.shape[2]-1]
+        boundary = DatasetsUtils.get_random_crop_boundary_3d(crop_size, cropped_boundary)
+
+        Z_min, Y_min, X_min, Z_max, Y_max, X_max = boundary
+
+        cropped_image = image_arr[Z_min:Z_max, Y_min:Y_max, X_min:X_max]
+        cropped_mask = mask_arr[Z_min:Z_max, Y_min:Y_max, X_min:X_max]
+
+        cropped_image, cropped_mask = DatasetsUtils.extend_image_mask_boundary_for_seg(cropped_image, cropped_mask, dst_size)
+
+        out_sitk_image = sitk.GetImageFromArray(cropped_image)
+        out_sitk_mask = sitk.GetImageFromArray(cropped_mask)
+
+        sitk.WriteImage(out_sitk_image, out_image_file)
+        sitk.WriteImage(out_sitk_mask, out_mask_file)
+
+    end = time.time()
+    print('====> test_extend_image_mask_boundary_for_seg time elapsed:\t{:.3f}s'.format(end-beg))
+
+def test_crop_image_mask_with_padding():
+    beg = time.time()
+    image_file = '/fileser/zhangwd/data/lung/changzheng/airway/airway_20201030/paires_croped_by_coarse_lung_seg/images/1.2.840.113704.1.111.10192.1571886399.11.nii.gz'
+    mask_file = '/fileser/zhangwd/data/lung/changzheng/airway/airway_20201030/paires_croped_by_coarse_lung_seg/masks/1.2.840.113704.1.111.10192.1571886399.11.nii.gz'
+
+    out_dir = './tmp_out/test_crop_image_mask_with_padding'
+    os.makedirs(out_dir, exist_ok=True)
+
+    sitk_image = sitk.ReadImage(image_file)
+    image_arr = sitk.GetArrayFromImage(sitk_image)
+    sitk_mask = sitk.ReadImage(mask_file)
+    mask_arr = sitk.GetArrayFromImage(sitk_mask)
+
+    # 1. 验证是否出错
+    dst_size = [128, 128, 128]
+    # for i in tqdm(range(200)):
+    #     DatasetsUtils.crop_image_mask_with_padding(image_arr, mask_arr, dst_size, boundary_value=0)
+
+    # 2. check 随机抽样
+    # for i in tqdm(range(2000)):
+    #     dst_size = [np.random.randint(100, 300), np.random.randint(100, 300), np.random.randint(100, 300)]
+    #     cropped_image, cropped_mask = DatasetsUtils.crop_image_mask_with_padding(image_arr, mask_arr, dst_size, boundary_value=0)
+    #     assert list(cropped_image.shape) == dst_size
+
+    # 3. 保存查看增强数据
+    for i in tqdm(range(10)):
+        out_image_file = os.path.join(out_dir, 'image_{}.nii.gz'.format(i))
+        out_mask_file = os.path.join(out_dir, 'mask_{}.nii.gz'.format(i))
+        dst_size = [np.random.randint(100, 300), np.random.randint(100, 300), np.random.randint(100, 300)]
+        cropped_image, cropped_mask = DatasetsUtils.crop_image_mask_with_padding(image_arr, mask_arr, dst_size, boundary_value=0)
+        
+        out_sitk_image = sitk.GetImageFromArray(cropped_image)
+        out_sitk_mask = sitk.GetImageFromArray(cropped_mask)
+
+        sitk.WriteImage(out_sitk_image, out_image_file)
+        sitk.WriteImage(out_sitk_mask, out_mask_file)
+
+
+    end = time.time()
+    print('====> test_crop_image_mask_with_padding time elapsed:\t{:.3f}s'.format(end-beg))
 
 if __name__ == '__main__':
     # test_resample_image_mask_unsame_resolution_multiprocess()
     # test_restore_ori_image_from_resampled_image()
-    test_cut_image_into_blocks_by_sliding_window()
+    # test_cut_image_into_blocks_by_sliding_window()
+    # test_extend_image_mask_boundary_for_seg()
+    test_crop_image_mask_with_padding()
 
