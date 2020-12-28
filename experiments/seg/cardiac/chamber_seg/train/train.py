@@ -80,6 +80,14 @@ def main():
             torch.save(model.cpu().state_dict(), saved_model_path)
             print('====> save model:\t{}'.format(saved_model_path))
 
+def load_cardic_inference_model(model_pth=None):
+    if model_pth is None:
+        model_pth = './common_seg_train_0.030_val_0.055'
+    num_classes = 8
+    model = ResampledUnet3D(1, num_classes)
+    model.load_state_dict(torch.load(model_pth))
+    return model
+
 
 def inference():
     out_dir = './tmp_out'
