@@ -94,20 +94,57 @@ class ImagePostProcessingUtils:
 
 
 def test_get_maximal_connected_region_multilabel():
-    in_mask_file = '/home/zhangwd/code/work/Lung_COPD/data/copd_400/registried_exp/1.3.12.2.1107.5.1.4.73793.30000017062123413576900064037/mask_pred.nii.gz'
-    in_mask = sitk.ReadImage(in_mask_file)
 
-    beg = time.time()
-    out_mask_sitk = ImagePostProcessingUtils.get_maximal_connected_region_multilabel(in_mask, mask_labels=[1, 2, 3])
+    test_mode = 'cardiac'
+    # 肺气管+左右肺粗分割
+    if test_mode == 'coarse_airway':
+        in_mask_file = '/home/zhangwd/code/work/Lung_COPD/data/copd_400/registried_exp/1.3.12.2.1107.5.1.4.73793.30000017062123413576900064037/mask_pred.nii.gz'
+        in_mask = sitk.ReadImage(in_mask_file)
 
-    out_dir = './tmp_out'
-    os.makedirs(out_dir, exist_ok=True)
-    out_file = os.path.join(out_dir, 'test_get_maximal_connected_region_multilabel.nii.gz')
-    sitk.WriteImage(out_mask_sitk, out_file)
+        beg = time.time()
+        out_mask_sitk = ImagePostProcessingUtils.get_maximal_connected_region_multilabel(in_mask, mask_labels=[1, 2, 3])
 
-    end = time.time()
+        out_dir = './tmp_out'
+        os.makedirs(out_dir, exist_ok=True)
+        out_file = os.path.join(out_dir, 'test_get_maximal_connected_region_multilabel.nii.gz')
+        sitk.WriteImage(out_mask_sitk, out_file)
 
-    print('====> test_get_maximal_connected_region_multilabel time elapsed:\t{:.3f}s'.format(end-beg))
+        end = time.time()
+
+        print('====> test_get_maximal_connected_region_multilabel time elapsed:\t{:.3f}s'.format(end-beg))
+
+    # 心脏粗分割
+
+    if test_mode == 'cardiac':
+        root_dir = '/fileser/zhangwd/data/cardiac/cta2mbf/20201216/3.sorted_mask'
+        for pid in tqdm(os.listdir(root_dir)):
+            pid_path = os.path.join(root_dir, pid)
+            if not os.path.isdir(pid_path):
+                continue
+            cta_root = os.path.join(pid_path, 'CTA')
+            mip_root = os.path.join(pid_path, 'MIP')
+            avg_root = os.path.join(pid_path, 'AVG')
+            
+            in_cta_file = os.path.join(cta_root, 'CTA_MASK.nii.gz')
+            out_cta_file = os.path.join(cta_root, 'CTA_MASK_connected.nii.gz')
+            in_mip_file = os.path.join(mip_root, 'MIP_MASK.nii.gz')
+            out_mip_file = os.path.join(mip_root, 'MIP_MASK_connected.nii.gz')
+            in_avg_file = os.path.join(avg_root, 'AVG_MASK.nii.gz')
+            out_avg_file = os.path.join(avg_root, 'AVG_MASK_connected.nii.gz')
+
+            in_mask = sitk.ReadImage(in_cta_file)
+            out_mask_sitk = ImagePostProcessingUtils.get_maximal_connected_region_multilabel(in_mask, mask_labels=[1, 2, 3, 4, 6])
+            sitk.WriteImage(out_mask_sitk, out_cta_file)
+
+            in_mask = sitk.ReadImage(in_mip_file)
+            out_mask_sitk = ImagePostProcessingUtils.get_maximal_connected_region_multilabel(in_mask, mask_labels=[1, 2, 3, 4, 6])
+            sitk.WriteImage(out_mask_sitk, out_mip_file)
+
+            in_mask = sitk.ReadImage(in_avg_file)
+            out_mask_sitk = ImagePostProcessingUtils.get_maximal_connected_region_multilabel(in_mask, mask_labels=[1, 2, 3, 4, 6])
+            sitk.WriteImage(out_mask_sitk, out_avg_file)
+
+
 
 
 def test_extract_region_by_mask():
@@ -136,7 +173,7 @@ def test_extract_region_by_mask():
 
 
 if __name__ == '__main__':
-    # test_get_maximal_connected_region_multilabel()
-    test_extract_region_by_mask()
+    test_get_maximal_connected_region_multilabel()
+    # test_extract_region_by_mask()
     
 
