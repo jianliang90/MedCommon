@@ -53,14 +53,15 @@ def download_dcms_with_website_singletask(download_pth, series_uids, urls):
     for i in tqdm(range(len(series_uids))):
         download_dcm(download_pth, series_uids[0], urls[3])
 
-def download_dcms_with_website_multiprocess(download_pth, config_file, process_num):
+def download_dcms_with_website_multiprocess(download_pth, config_file, process_num=12):
     sheet_num = 0
     df = pd.read_csv(config_file)
 
     series_uids = df[df.columns[0]].tolist()
     urls = df[df.columns[3]].tolist()
 
-    
+    # # this for single thread to debug
+    # download_dcms_with_website_singletask(download_pth, series_uids, urls)
 
     # this for run 
     num_per_process = (len(series_uids) + process_num - 1)//process_num
@@ -79,7 +80,7 @@ def download_dcms_with_website_multiprocess(download_pth, config_file, process_n
         sub_urls = urls[num_per_process*i:min(num_per_process*(i+1), len(series_uids))]
         print(len(sub_series_uids))
         result = pool.apply_async(download_dcms_with_website_singletask,
-            args=(sub_series_uids, sub_urls))
+            args=(download_pth, sub_series_uids, sub_urls))
         results.append(result)
 
     pool.close()
@@ -88,8 +89,9 @@ def download_dcms_with_website_multiprocess(download_pth, config_file, process_n
     print('hello world!')
 
 def test_download_dcms_with_website_multiprocess():
+    download_pth = '/fileser/zhangwd/data/hospital/huadong/copd/copd_gan/data_457/images/inhale'
     config_file = '/fileser/zhangwd/data/hospital/huadong/copd/copd_gan/data_457/annotation/文件内网地址信息-导出结果_inhale.csv'
-    download_dcms_with_website_multiprocess(None, config_file)
+    download_dcms_with_website_multiprocess(download_pth, config_file)
 
 
 def download_label(Down_path, series_IDs, down_dirs):
@@ -170,5 +172,5 @@ def rename_mask_files(indir, outdir, config_file):
 
 
 if __name__ == '__main__':
-    fire.Fire()
-    # test_download_dcms_with_website_multiprocess()
+    # fire.Fire()
+    test_download_dcms_with_website_multiprocess()
