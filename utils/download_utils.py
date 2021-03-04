@@ -51,7 +51,7 @@ def download_dcms_with_website(download_pth, config_file):
 
 def download_dcms_with_website_singletask(download_pth, series_uids, urls):
     for i in tqdm(range(len(series_uids))):
-        download_dcm(download_pth, series_uids[0], urls[3])
+        download_dcm(download_pth, series_uids[i], urls[i])
 
 def download_dcms_with_website_multiprocess(download_pth, config_file, process_num=12):
     sheet_num = 0
