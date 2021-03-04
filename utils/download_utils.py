@@ -8,6 +8,8 @@ import shutil
 
 import fire
 
+from glob import glob
+
 
 
 def download_dcm(Down_path, series_ID, down_dir):

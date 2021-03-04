@@ -435,7 +435,6 @@ class DatasetsUtils:
             f.write('\n'.join(test_series_uids))   
 
 
-
 def test_resample_image_mask_unsame_resolution_multiprocess():
     
     '''
