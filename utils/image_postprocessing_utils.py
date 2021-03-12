@@ -201,7 +201,7 @@ def test_replace_region_by_mask():
     
     beg = time.time()
 
-    root = '/data/zhangwd/data/lung/copd/copd_412/images/out_pairs/1.3.12.2.1107.5.1.4.73793.30000017091723391141600059938_1.3.12.2.1107.5.1.4.73793.30000017091723391141600059533'
+    root = '/data/zhangwd/data/lung/copd/copd_412/images/out_pairs/1.3.12.2.1107.5.1.4.75745.30000019080800204048700021234_1.3.12.2.1107.5.1.4.75745.30000019080800204048700020695'
 
     bg_img_file = os.path.join(root, 'image_raw.nii.gz')
     fg_img_file = os.path.join(root, 'left_res.nii')

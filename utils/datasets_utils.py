@@ -434,6 +434,69 @@ class DatasetsUtils:
         with open(os.path.join(out_config_dir, 'test.txt'), 'w') as f:
             f.write('\n'.join(test_series_uids))   
 
+    @staticmethod
+    def pairs_split_3d_to_2d_slice_onecase(src_file, dst_file, out_dir, non_zero_pixels=10):
+        src_image = sitk.ReadImage(src_file)
+        src_data = sitk.GetArrayFromImage(src_image)
+        dst_image = sitk.ReadImage(dst_file)
+        dst_data = sitk.GetArrayFromImage(dst_image)
+        os.makedirs(out_dir, exist_ok=True)
+        for z in range(dst_data.shape[0]):
+            tmp_arr = np.zeros(dst_data[z].shape)
+            tmp_arr[dst_data[z] != 0] = 1
+            if np.sum(tmp_arr) < 10:
+                out_src_file = os.path.join(out_dir, 'src_{}_neg.npy'.format(z))
+                out_dst_file = os.path.join(out_dir, 'dst_{}_neg.npy'.format(z))
+            else:
+                out_src_file = os.path.join(out_dir, 'src_{}_pos.npy'.format(z))
+                out_dst_file = os.path.join(out_dir, 'dst_{}_pos.npy'.format(z))
+
+            np.save(out_src_file, src_data[z])
+            np.save(out_dst_file, dst_data[z])
+
+    def pairs_split_3d_to_2d_slice_singletask(series_uids, in_dir, out_dir, src_pattern, dst_pattern):
+        for series_uid in tqdm(series_uids):
+            src_file = os.path.join(in_dir, series_uid, src_pattern)
+            dst_file = os.path.join(in_dir, series_uid, dst_pattern)
+            out_series_dir = os.path.join(out_dir, series_uid)
+            try:
+                DatasetsUtils.pairs_split_3d_to_2d_slice_onecase(src_file, dst_file, out_series_dir)
+            except Exception as e:
+                print(e)
+                print('====> Error when process {}!'.format(series_uid))
+
+    def pairs_split_3d_to_2d_slice_multiprocess(indir, outdir, src_pattern, dst_pattern, process_num=5):
+        
+        series_uids = os.listdir(indir)
+        
+        # print(series_uids)
+        num_per_process = (len(series_uids) + process_num - 1)//process_num
+
+        # this for single thread to debug
+        # DatasetsUtils.pairs_split_3d_to_2d_slice_singletask(series_uids, indir, outdir, 
+        #                src_pattern, dst_pattern)
+
+        # this for run 
+        import multiprocessing
+        from multiprocessing import Process
+        multiprocessing.freeze_support()
+
+        pool = multiprocessing.Pool()
+
+        results = []
+
+        print(len(series_uids))
+        for i in range(process_num):
+            sub_series_uids = series_uids[num_per_process*i:min(num_per_process*(i+1), len(series_uids))]
+            print(len(sub_series_uids))
+            result = pool.apply_async(DatasetsUtils.pairs_split_3d_to_2d_slice_singletask, 
+                args=(sub_series_uids, indir, outdir, 
+                        src_pattern, dst_pattern))
+            results.append(result)
+
+        pool.close()
+        pool.join()
+
 
 def test_resample_image_mask_unsame_resolution_multiprocess():
     
@@ -615,10 +678,20 @@ def test_crop_image_mask_with_padding():
     end = time.time()
     print('====> test_crop_image_mask_with_padding time elapsed:\t{:.3f}s'.format(end-beg))
 
+def test_pairs_split_3d_to_2d_slice_multiprocess():
+    # 华东COPD
+    indir = '/data/zhangwd/data/lung/copd/copd_412/images/out_pairs'
+    outdir = '/fileser/zhangwd/data/hospital/huadong/copd/copd_gan/data_412/images/slice'
+    src_pattern = 'image_raw.nii.gz'
+    dst_pattern = 'substraction.nii.gz'
+    
+    DatasetsUtils.pairs_split_3d_to_2d_slice_multiprocess(indir, outdir, src_pattern, dst_pattern)
+
 if __name__ == '__main__':
     # test_resample_image_mask_unsame_resolution_multiprocess()
     # test_restore_ori_image_from_resampled_image()
     # test_cut_image_into_blocks_by_sliding_window()
     # test_extend_image_mask_boundary_for_seg()
-    test_crop_image_mask_with_padding()
+    # test_crop_image_mask_with_padding()
+    test_pairs_split_3d_to_2d_slice_multiprocess()
 
