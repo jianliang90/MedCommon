@@ -36,6 +36,28 @@
             "args": [
                 "--config", "../resources/train_config_dice.yaml"
             ]
+        },
+
+        {
+            "name": "common: gan pix2pix",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "cwd": "${fileDirname}",
+            "env": {
+                "CUDA_VISIBLE_DEVICES": "0"
+            },
+            "args": [
+                "--dataroot", "xxx",
+                "--model", "pix2pix_3d", 
+                "--input_nc", "1", 
+                "--output_nc", "1", 
+                "--ngf", "32",
+                "--netG", "resnet_6blocks",
+                "--no_dropout",
+                "--netD", "pixel",
+            ]
         }
     ]
 }

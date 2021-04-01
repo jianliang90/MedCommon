@@ -1,0 +1,2 @@
+CUDA_VISIBLE_DEVICES=0,1 python -m torch.distributed.launch --nproc_per_node=2 --nnodes=1 unit_test_pix2pix.py --dataroot xxx --model pix2pix_3d --input_nc 1 --output_nc 1 --ngf 32 --netG resnet_6blocks --ndf 8 --no_dropout --netD pixel --norm instance
+CUDA_VISIBLE_DEVICES=0,1 python unit_test_pix2pix.py --dataroot xxx --model pix2pix_3d --input_nc 1 --output_nc 1 --ngf 32 --netG resnet_6blocks --no_dropout --netD pixel

@@ -1,3 +1,9 @@
 [submodule "segmentation/external_lib/MedicalZooPytorch"]
 	path = segmentation/external_lib/MedicalZooPytorch
 	url = https://github.com/searobbersduck/MedicalZooPytorch.git
+[submodule "gan/external_lib/pytorch-CycleGAN-and-pix2pix"]
+	path = gan/external_lib/pytorch-CycleGAN-and-pix2pix
+	url = https://github.com/junyanz/pytorch-CycleGAN-and-pix2pix.git
+[submodule "gan/external_lib/torchio"]
+	path = gan/external_lib/torchio
+	url = https://github.com/searobbersduck/torchio.git
