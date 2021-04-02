@@ -75,6 +75,8 @@ for epoch in range(opt.epoch_count, opt.n_epochs + opt.n_epochs_decay + 1):    #
             if total_iters % opt.display_freq == 0:   # display images on visdom and save images to a HTML file
                 save_result = total_iters % opt.update_html_freq == 0
                 model.compute_visuals()
+
+                import matplotlib.pyplot as plt
                 vis_result = model.get_current_visuals()
                 for key in vis_result.keys():
                     if 'real_A' in key:
@@ -89,6 +91,7 @@ for epoch in range(opt.epoch_count, opt.n_epochs + opt.n_epochs_decay + 1):    #
                         w_min = wl-ww/2
                         w_max = wl+ww/2
                         vis_result[key] = torch.clamp(vis_result[key], min=w_min, max=w_max)/ww
+                        vis_result[key] = plt.get_cmap('jet')(vis_result[key].detach().cpu().numpy()).squeeze()[...,:3]*255
                 visualizer.display_current_results(vis_result, epoch_iter, False)
 
 
@@ -115,27 +118,5 @@ for epoch in range(opt.epoch_count, opt.n_epochs + opt.n_epochs_decay + 1):    #
 
     print('End of epoch %d / %d \t Time Taken: %d sec' % (epoch, opt.n_epochs + opt.n_epochs_decay, time.time() - epoch_start_time))
     model.update_learning_rate()                     # update learning rates at the end of every epoch.
-
-        # vis_result = model.get_current_visuals()
-        # for key in vis_result.keys():
-        #     if 'real_A' in key:
-        #         ww = 400
-        #         wl = 40
-        #         w_min = wl-ww/2
-        #         w_max = wl+ww/2
-        #         vis_result[key] = torch.clamp(vis_result[key], min=w_min, max=w_max)/ww
-        #     else:
-        #         ww = 150
-        #         wl = 75
-        #         w_min = wl-ww/2
-        #         w_max = wl+ww/2
-        #         vis_result[key] = torch.clamp(vis_result[key], min=w_min, max=w_max)/ww
-        # visualizer.display_current_results(vis_result, epoch_iter, False)
-
-        # losses = model.get_current_losses() 
-        # visualizer.print_current_losses(50, epoch_iter, losses, 0, 0)
-        # print('hello world!')
-
-# time.sleep(30)
 
 print('hello world!')
