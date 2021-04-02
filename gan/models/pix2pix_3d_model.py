@@ -130,3 +130,22 @@ class Pix2Pix3DModel(BaseModel):
         self.optimizer_G.zero_grad()        # set G's gradients to zero
         self.backward_G()                   # calculate graidents for G
         self.optimizer_G.step()             # udpate G's weights
+
+    def get_current_visuals(self):
+        """Return visualization images. train.py will display these images with visdom, and save the images to a HTML"""
+        from collections import OrderedDict
+        visual_ret = OrderedDict()
+        for name in self.visual_names:
+            if isinstance(name, str):
+                tensor = getattr(self, name)
+                coronal_name = '{}_coronal'.format(name)
+                coronal_tensor = tensor[:,:,:,tensor.shape[-2]//3, :]
+                sagital_name = '{}_sagital'.format(name)
+                sagital_tensor = tensor[:,:,:,:, tensor.shape[-1]//3]
+                axial_name = '{}_axial'.format(name)
+                axial_tensor = tensor[:,:,tensor.shape[-3]//3,:,:]
+                # visual_ret[name] = getattr(self, name)
+                visual_ret[coronal_name] = coronal_tensor
+                # visual_ret[sagital_name] = sagital_tensor
+                # visual_ret[axial_name] = axial_tensor
+        return visual_ret

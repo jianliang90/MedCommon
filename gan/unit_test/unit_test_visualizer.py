@@ -22,6 +22,7 @@ for i in range(100):
     images = OrderedDict()
     images['0'] = np.random.randint(0, 255, size=(224, 224, 3))
     images['1'] = np.random.randint(0, 255, size=(224, 224, 3))
+
     visualizer.display_current_results(images, 0, 0)
     print(i)
     time.sleep(1)
