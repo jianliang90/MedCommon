@@ -19,13 +19,18 @@ def get_common_transform(image_shape, type='GAN'):
     if type == 'GAN':
         default_transform = tio.Compose([
             tio.RandomFlip(axes=[0,1,2]), 
-            tio.RandomAnisotropy(p=0.25),              # make images look anisotropic 25% of times
+            tio.RandomAnisotropy(downsampling=(1,2.5),scalars_only=False,p=0.25),              # make images look anisotropic 25% of times
             tio.OneOf({                                # either
                 tio.RandomCropOrPad((image_shape[0], image_shape[1], image_shape[2])): 0.8,
                 tio.CropOrPad((image_shape[0], image_shape[1], image_shape[2])):0.2,   # or random elastic deformation
             }),
             tio.RandomBlur(p=0.25),                    # blur 25% of times
             tio.RandomNoise(p=0.25)
+        ])
+    elif type == 'DEBUG':
+        default_transform = tio.Compose([
+            tio.RandomAnisotropy(p=0.999),              # make images look anisotropic 25% of times
+            tio.CropOrPad((image_shape[0], image_shape[1], image_shape[2]))
         ])        
     else:
         default_transform = tio.Compose([
@@ -98,6 +103,7 @@ class GAN_COMMON_DS(Dataset):
 
         for (src, dst) in zip(src_files, dst_files):
             subject = tio.Subject(src=tio.ScalarImage(src), dst=tio.LabelMap(dst))
+            # subject = tio.Subject(src=tio.ScalarImage(src), dst=tio.ScalarImage(dst))
             subjects.append(subject)
 
         self.subjects_dataset = tio.SubjectsDataset(subjects, transform=self.transforms)
