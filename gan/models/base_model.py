@@ -168,8 +168,8 @@ class BaseModel(ABC):
                             net.cuda(self.gpu_ids[0])    
                     else:
                         torch.save(net.cpu().state_dict(), save_path)
-        if self.opt.distributed:
-            torch.distributed.barrier()
+        # if self.opt.distributed:
+        #     torch.distributed.barrier()
 
     def __patch_instance_norm_state_dict(self, state_dict, module, keys, i=0):
         """Fix InstanceNorm checkpoints incompatibility (prior to 0.4)"""
@@ -209,6 +209,9 @@ class BaseModel(ABC):
                 for key in list(state_dict.keys()):  # need to copy keys here because we mutate in loop
                     self.__patch_instance_norm_state_dict(state_dict, net, key.split('.'))
                 net.load_state_dict(state_dict)
+
+        if self.opt.distributed:
+            torch.distributed.barrier()
 
     def print_networks(self, verbose):
         """Print the total number of parameters in the network and (if verbose) network architecture
