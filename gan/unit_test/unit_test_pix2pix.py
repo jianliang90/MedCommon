@@ -32,7 +32,7 @@ print(opt)
 
 
 data_root = '/fileser/zhangwd/data/cardiac/cta2mbf/data_114_20210318/5.mbf_myocardium'
-transform = get_common_transform([224,224,32],'GAN')
+transform = get_common_transform([320,320,160],'GAN')
 ds = GAN_COMMON_DS(data_root, 'cropped_cta.nii.gz', 'cropped_mbf.nii.gz', [64,64,64], transform)
 dataloader = DataLoader(ds, batch_size=1, num_workers=2, shuffle=True, pin_memory=True)
 dataset_size = len(dataloader)    # get the number of images in the dataset.

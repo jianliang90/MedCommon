@@ -31,6 +31,10 @@ def get_common_transform(image_shape, type='GAN'):
         default_transform = tio.Compose([
             tio.RandomAnisotropy(p=0.999),              # make images look anisotropic 25% of times
             tio.CropOrPad((image_shape[0], image_shape[1], image_shape[2]))
+        ])
+    elif type == 'GAN_INFERENCE':
+        default_transform = tio.Compose([
+            tio.CropOrPad((image_shape[0], image_shape[1], image_shape[2]))
         ])        
     else:
         default_transform = tio.Compose([
@@ -114,5 +118,17 @@ class GAN_COMMON_DS(Dataset):
 
     def __getitem__(self, item):
         return self.subjects_dataset.__getitem__(item)
+
+
+class GANDataWrapper:
+    def __init__(self):
+        pass
+    @staticmethod
+    def get_processed_image(transforms, infile):
+        subject = tio.Subject(src=tio.ScalarImage(infile))
+        subjects = []
+        subjects.append(subject)
+        subjects_dataset = tio.SubjectsDataset(subjects, transform=transforms)
+        return subjects_dataset.__getitem__(0)
 
 
