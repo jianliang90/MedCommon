@@ -92,7 +92,6 @@ class ImagePostProcessingUtils:
         
         return out_img
 
-
     @staticmethod
     def replace_region_by_mask(bg_stik_image, fg_sitk_image, sitk_mask, default_value=0, mask_label=None):
         # if mask_label is not None:
@@ -118,6 +117,34 @@ class ImagePostProcessingUtils:
         out_img.CopyInformation(bg_stik_image) 
 
         return out_img
+
+
+    @staticmethod
+    def add_region_by_mask(bg_stik_image, fg_sitk_image, sitk_mask, default_value=0, mask_label=None):
+        # if mask_label is not None:
+        #     mask_arr = sitk.GetArrayFromImage(sitk_mask)
+        #     mask_arr[mask_arr != mask_label] = 0
+        #     mask_arr[mask_arr == mask_label] = 1
+        #     sitk_mask_new = sitk.GetImageFromArray(mask_arr)
+        #     sitk_mask_new.CopyInformation(sitk_mask)
+        # else:
+        #     sitk_mask_new = sitk_mask
+
+        sitk_mask_new = sitk_mask
+        mask_arr = sitk.GetArrayFromImage(sitk_mask_new)
+        bg_arr = sitk.GetArrayFromImage(bg_stik_image)
+        fg_arr = sitk.GetArrayFromImage(fg_sitk_image)
+
+        # bg_arr[mask_arr == mask_label] = 0
+        fg_arr[mask_arr != mask_label] = 0
+
+        bg_arr = bg_arr + fg_arr
+
+        out_img = sitk.GetImageFromArray(bg_arr)
+        out_img.CopyInformation(bg_stik_image) 
+
+        return out_img
+
 
 
 def test_get_maximal_connected_region_multilabel():
@@ -222,9 +249,41 @@ def test_replace_region_by_mask():
     end = time.time()
     print('====> test_replace_region_by_mask time elapsed:\t{:.3f}s'.format(end-beg))
 
+
+def test_add_region_by_mask():
+    
+    beg = time.time()
+
+    root = '/fileser/zhangwd/data/hospital/huadong/copd/copd_gan/data_412/images/inference_result/1.2.156.112605.14038007945377.191013234240.3.5228.39324'
+    mask_root = '/fileser/zhangwd/data/hospital/huadong/copd/copd_gan/data_412/images/registried_exp/1.2.156.112605.14038007945377.191013234240.3.5228.39324'
+    out_root = '/fileser/zhangwd/data/hospital/huadong/copd/copd_gan/data_412/images/inference_result3/1.2.156.112605.14038007945377.191013234240.3.5228.39324'
+
+
+    bg_img_file = os.path.join(root, 'real_A.nii.gz')
+    fg_img_file = os.path.join(root, 'real_B.nii')
+    mask_file = os.path.join(mask_root, 'mask_pred_connected.nii.gz')
+
+    bg_sitk_img = sitk.ReadImage(bg_img_file)
+    fg_sitk_img = sitk.ReadImage(fg_img_file)
+    sitk_mask = sitk.ReadImage(mask_file)
+
+    bg_sitk_img = ImagePostProcessingUtils.add_region_by_mask(bg_sitk_img, fg_sitk_img, sitk_mask, 0, mask_label=1)
+
+    # os.makedirs(out_root, exist_ok=True)
+    # fg_img_file  = os.path.join(root, 'real_exhale.nii')
+    # fg_sitk_img = sitk.ReadImage(fg_img_file)
+    
+    bg_sitk_img = ImagePostProcessingUtils.add_region_by_mask(bg_sitk_img, fg_sitk_img, sitk_mask, 0, mask_label=2)
+
+    sitk.WriteImage(bg_sitk_img, os.path.join(out_root, 'real_exhale.nii'))
+    end = time.time()
+    print('====> test_replace_region_by_mask time elapsed:\t{:.3f}s'.format(end-beg))
+
+
 if __name__ == '__main__':
     # test_get_maximal_connected_region_multilabel()
     # test_extract_region_by_mask()
-    test_replace_region_by_mask()
+    # test_replace_region_by_mask()
+    test_add_region_by_mask()
     
 
