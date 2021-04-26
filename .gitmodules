@@ -7,3 +7,6 @@
 [submodule "gan/external_lib/torchio"]
 	path = gan/external_lib/torchio
 	url = https://github.com/searobbersduck/torchio.git
+[submodule "external_lib/torchio"]
+	path = external_lib/torchio
+	url = https://github.com/searobbersduck/torchio.git

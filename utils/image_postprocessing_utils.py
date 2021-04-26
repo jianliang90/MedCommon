@@ -70,19 +70,28 @@ class ImagePostProcessingUtils:
         out_mask_sitk.CopyInformation(in_mask)
         return out_mask_sitk
 
-
     @staticmethod
-    def extract_region_by_mask(sitk_image, sitk_mask, default_value=0, mask_label=None):
-        
+    def fix_mask_label(sitk_mask, mask_label):
         if mask_label is not None:
             mask_arr = sitk.GetArrayFromImage(sitk_mask)
-            mask_arr[mask_arr != mask_label] = 0
-            mask_arr[mask_arr == mask_label] = 1
+            if isinstance(mask_label, list):
+                mask_mask_arr = mask_arr != mask_label[0]
+                for l in range(1, len(mask_label)):
+                    mask_mask_arr = mask_mask_arr & (mask_arr != mask_label[l])
+                mask_arr[mask_mask_arr] = 0
+                mask_arr[~mask_mask_arr] = 1
+            else:
+                mask_arr[mask_arr != mask_label] = 0
+                mask_arr[mask_arr == mask_label] = 1
             sitk_mask_new = sitk.GetImageFromArray(mask_arr)
             sitk_mask_new.CopyInformation(sitk_mask)
         else:
             sitk_mask_new = sitk_mask
+        return sitk_mask_new
 
+    @staticmethod
+    def extract_region_by_mask(sitk_image, sitk_mask, default_value=0, mask_label=None):
+        sitk_mask_new = ImagePostProcessingUtils.fix_mask_label(sitk_mask, mask_label)
         maskfilter = sitk.MaskImageFilter ()
         maskfilter.SetOutsideValue(default_value)
         src_img = sitk.Cast(sitk_image, sitk.sitkInt16)
@@ -121,22 +130,14 @@ class ImagePostProcessingUtils:
 
     @staticmethod
     def add_region_by_mask(bg_stik_image, fg_sitk_image, sitk_mask, default_value=0, mask_label=None):
-        # if mask_label is not None:
-        #     mask_arr = sitk.GetArrayFromImage(sitk_mask)
-        #     mask_arr[mask_arr != mask_label] = 0
-        #     mask_arr[mask_arr == mask_label] = 1
-        #     sitk_mask_new = sitk.GetImageFromArray(mask_arr)
-        #     sitk_mask_new.CopyInformation(sitk_mask)
-        # else:
-        #     sitk_mask_new = sitk_mask
-
-        sitk_mask_new = sitk_mask
+        sitk_mask_new = ImagePostProcessingUtils.fix_mask_label(sitk_mask, mask_label)
+        # sitk_mask_new = sitk_mask
         mask_arr = sitk.GetArrayFromImage(sitk_mask_new)
         bg_arr = sitk.GetArrayFromImage(bg_stik_image)
         fg_arr = sitk.GetArrayFromImage(fg_sitk_image)
 
         # bg_arr[mask_arr == mask_label] = 0
-        fg_arr[mask_arr != mask_label] = 0
+        fg_arr[mask_arr != 1] = 0
 
         bg_arr = bg_arr + fg_arr
 
@@ -145,6 +146,26 @@ class ImagePostProcessingUtils:
 
         return out_img
 
+    @staticmethod
+    def add_extract_region_by_mask(bg_stik_image, fg_sitk_image, sitk_mask, default_value=0, mask_label=None):
+        sitk_mask_new = ImagePostProcessingUtils.fix_mask_label(sitk_mask, mask_label)
+
+        bg_stik_image = sitk.Cast(bg_stik_image, sitk.sitkInt16)
+        fg_sitk_image = sitk.Cast(fg_sitk_image, sitk.sitkInt16)
+
+        # add 
+        add_filter = sitk.AddImageFilter()
+        out_img = add_filter.Execute(bg_stik_image, fg_sitk_image)
+        out_img.CopyInformation(bg_stik_image)
+
+        # extract
+        maskfilter = sitk.MaskImageFilter ()
+        maskfilter.SetOutsideValue(default_value)
+        mask_img = sitk.Cast(sitk_mask_new, sitk.sitkInt16)
+        out_img = maskfilter.Execute(out_img, mask_img)
+        out_img.CopyInformation(bg_stik_image)
+
+        return out_img
 
 
 def test_get_maximal_connected_region_multilabel():
@@ -201,22 +222,45 @@ def test_get_maximal_connected_region_multilabel():
 
 def test_extract_region_by_mask():
 
+    # ------------------------------------------------------------------------------------
+    # case 1:
+    # beg = time.time()
+
+    # image_file = '/home/zhangwd/code/work/Lung_COPD/data/copd_400/registried_exp/1.3.12.2.1107.5.1.4.73793.30000017062123413576900064037/image_raw.nii.gz'
+    # mask_file = '/home/zhangwd/code/work/Lung_COPD/data/copd_400/registried_exp/1.3.12.2.1107.5.1.4.73793.30000017062123413576900064037/mask_pred.nii.gz'
+    # out_dir = './tmp_out'
+    # os.makedirs(out_dir, exist_ok=True)
+    
+    # sitk_image = sitk.ReadImage(image_file)
+    # sitk_mask = sitk.ReadImage(mask_file)
+
+    # extracted_image = ImagePostProcessingUtils.extract_region_by_mask(sitk_image, sitk_mask, mask_label=1)
+    # out_file = os.path.join(out_dir, 'test_extract_region_by_mask_1.nii.gz')
+    # sitk.WriteImage(extracted_image, out_file)
+
+    # extracted_image = ImagePostProcessingUtils.extract_region_by_mask(sitk_image, sitk_mask, mask_label=2)
+    # out_file = os.path.join(out_dir, 'test_extract_region_by_mask_2.nii.gz')
+    # sitk.WriteImage(extracted_image, out_file)
+
+    # end = time.time()
+
+    # print('====> test_extract_region_by_mask time elapsed:\t{:.3f}s'.format(end-beg))
+
+    
+    # ------------------------------------------------------------------------------------
+    # case 2:
     beg = time.time()
 
-    image_file = '/home/zhangwd/code/work/Lung_COPD/data/copd_400/registried_exp/1.3.12.2.1107.5.1.4.73793.30000017062123413576900064037/image_raw.nii.gz'
-    mask_file = '/home/zhangwd/code/work/Lung_COPD/data/copd_400/registried_exp/1.3.12.2.1107.5.1.4.73793.30000017062123413576900064037/mask_pred.nii.gz'
+    image_file = '/data/medical/hospital/huadong/copd/copd_gan/data_412/images/registried_exp/1.3.12.2.1107.5.1.4.73793.30000017070323255650000019794/image_raw.nii.gz'
+    mask_file = '/data/medical/hospital/huadong/copd/copd_gan/data_412/images/registried_exp/1.3.12.2.1107.5.1.4.73793.30000017070323255650000019794/mask_pred_connected.nii.gz'
     out_dir = './tmp_out'
     os.makedirs(out_dir, exist_ok=True)
     
     sitk_image = sitk.ReadImage(image_file)
     sitk_mask = sitk.ReadImage(mask_file)
 
-    extracted_image = ImagePostProcessingUtils.extract_region_by_mask(sitk_image, sitk_mask, mask_label=1)
-    out_file = os.path.join(out_dir, 'test_extract_region_by_mask_1.nii.gz')
-    sitk.WriteImage(extracted_image, out_file)
-
-    extracted_image = ImagePostProcessingUtils.extract_region_by_mask(sitk_image, sitk_mask, mask_label=2)
-    out_file = os.path.join(out_dir, 'test_extract_region_by_mask_2.nii.gz')
+    extracted_image = ImagePostProcessingUtils.extract_region_by_mask(sitk_image, sitk_mask, mask_label=[1,2])
+    out_file = os.path.join(out_dir, 'test_extract_region_by_mask_12.nii.gz')
     sitk.WriteImage(extracted_image, out_file)
 
     end = time.time()
@@ -252,11 +296,42 @@ def test_replace_region_by_mask():
 
 def test_add_region_by_mask():
     
+    # ------------------------------------------------------------------------------------
+    # case 1:
+    # beg = time.time()
+
+    # root = '/fileser/zhangwd/data/hospital/huadong/copd/copd_gan/data_412/images/inference_result/1.2.156.112605.14038007945377.191013234240.3.5228.39324'
+    # mask_root = '/fileser/zhangwd/data/hospital/huadong/copd/copd_gan/data_412/images/registried_exp/1.2.156.112605.14038007945377.191013234240.3.5228.39324'
+    # out_root = '/fileser/zhangwd/data/hospital/huadong/copd/copd_gan/data_412/images/inference_result3/1.2.156.112605.14038007945377.191013234240.3.5228.39324'
+
+
+    # bg_img_file = os.path.join(root, 'real_A.nii.gz')
+    # fg_img_file = os.path.join(root, 'real_B.nii')
+    # mask_file = os.path.join(mask_root, 'mask_pred_connected.nii.gz')
+
+    # bg_sitk_img = sitk.ReadImage(bg_img_file)
+    # fg_sitk_img = sitk.ReadImage(fg_img_file)
+    # sitk_mask = sitk.ReadImage(mask_file)
+
+    # bg_sitk_img = ImagePostProcessingUtils.add_region_by_mask(bg_sitk_img, fg_sitk_img, sitk_mask, 0, mask_label=1)
+
+    # # os.makedirs(out_root, exist_ok=True)
+    # # fg_img_file  = os.path.join(root, 'real_exhale.nii')
+    # # fg_sitk_img = sitk.ReadImage(fg_img_file)
+    
+    # bg_sitk_img = ImagePostProcessingUtils.add_region_by_mask(bg_sitk_img, fg_sitk_img, sitk_mask, 0, mask_label=2)
+
+    # sitk.WriteImage(bg_sitk_img, os.path.join(out_root, 'real_exhale.nii'))
+    # end = time.time()
+    # print('====> test_replace_region_by_mask time elapsed:\t{:.3f}s'.format(end-beg))
+
+    # ------------------------------------------------------------------------------------
+    # case 2:
     beg = time.time()
 
-    root = '/fileser/zhangwd/data/hospital/huadong/copd/copd_gan/data_412/images/inference_result/1.2.156.112605.14038007945377.191013234240.3.5228.39324'
-    mask_root = '/fileser/zhangwd/data/hospital/huadong/copd/copd_gan/data_412/images/registried_exp/1.2.156.112605.14038007945377.191013234240.3.5228.39324'
-    out_root = '/fileser/zhangwd/data/hospital/huadong/copd/copd_gan/data_412/images/inference_result3/1.2.156.112605.14038007945377.191013234240.3.5228.39324'
+    root = '/data/medical/hospital/huadong/copd/copd_gan/data_412/images/inference_result/1.2.156.112605.14038007945377.191013234240.3.5228.39324'
+    mask_root = '/data/medical/hospital/huadong/copd/copd_gan/data_412/images/registried_exp/1.2.156.112605.14038007945377.191013234240.3.5228.39324'
+    out_root = '/data/medical/hospital/huadong/copd/copd_gan/data_412/images/inference_result_tmp/1.2.156.112605.14038007945377.191013234240.3.5228.39324'
 
 
     bg_img_file = os.path.join(root, 'real_A.nii.gz')
@@ -267,15 +342,36 @@ def test_add_region_by_mask():
     fg_sitk_img = sitk.ReadImage(fg_img_file)
     sitk_mask = sitk.ReadImage(mask_file)
 
-    bg_sitk_img = ImagePostProcessingUtils.add_region_by_mask(bg_sitk_img, fg_sitk_img, sitk_mask, 0, mask_label=1)
+    bg_sitk_img = ImagePostProcessingUtils.add_region_by_mask(bg_sitk_img, fg_sitk_img, sitk_mask, 0, mask_label=[1,2])
 
-    # os.makedirs(out_root, exist_ok=True)
-    # fg_img_file  = os.path.join(root, 'real_exhale.nii')
-    # fg_sitk_img = sitk.ReadImage(fg_img_file)
-    
-    bg_sitk_img = ImagePostProcessingUtils.add_region_by_mask(bg_sitk_img, fg_sitk_img, sitk_mask, 0, mask_label=2)
+    os.makedirs(out_root, exist_ok=True)
+    sitk.WriteImage(bg_sitk_img, os.path.join(out_root, 'real_exhale.nii.gz'))
+    end = time.time()
+    print('====> test_replace_region_by_mask time elapsed:\t{:.3f}s'.format(end-beg))
 
-    sitk.WriteImage(bg_sitk_img, os.path.join(out_root, 'real_exhale.nii'))
+
+def test_add_extrat_region_by_mask():
+    # ------------------------------------------------------------------------------------
+    # case 2:
+    beg = time.time()
+
+    root = '/data/medical/hospital/huadong/copd/copd_gan/data_412/images/inference_result/1.2.156.112605.14038007945377.191013234240.3.5228.39324'
+    mask_root = '/data/medical/hospital/huadong/copd/copd_gan/data_412/images/registried_exp/1.2.156.112605.14038007945377.191013234240.3.5228.39324'
+    out_root = '/data/medical/hospital/huadong/copd/copd_gan/data_412/images/inference_result_tmp/1.2.156.112605.14038007945377.191013234240.3.5228.39324'
+
+
+    bg_img_file = os.path.join(root, 'real_A.nii.gz')
+    fg_img_file = os.path.join(root, 'real_B.nii')
+    mask_file = os.path.join(mask_root, 'mask_pred_connected.nii.gz')
+
+    bg_sitk_img = sitk.ReadImage(bg_img_file)
+    fg_sitk_img = sitk.ReadImage(fg_img_file)
+    sitk_mask = sitk.ReadImage(mask_file)
+
+    bg_sitk_img = ImagePostProcessingUtils.add_extract_region_by_mask(bg_sitk_img, fg_sitk_img, sitk_mask, 0, mask_label=[1,2])
+
+    os.makedirs(out_root, exist_ok=True)
+    sitk.WriteImage(bg_sitk_img, os.path.join(out_root, 'real_exhale_only_lung.nii.gz'))
     end = time.time()
     print('====> test_replace_region_by_mask time elapsed:\t{:.3f}s'.format(end-beg))
 
@@ -284,6 +380,7 @@ if __name__ == '__main__':
     # test_get_maximal_connected_region_multilabel()
     # test_extract_region_by_mask()
     # test_replace_region_by_mask()
-    test_add_region_by_mask()
+    # test_add_region_by_mask()
+    test_add_extrat_region_by_mask()
     
 

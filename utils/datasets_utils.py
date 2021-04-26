@@ -454,6 +454,7 @@ class DatasetsUtils:
             np.save(out_src_file, src_data[z])
             np.save(out_dst_file, dst_data[z])
 
+    @staticmethod
     def pairs_split_3d_to_2d_slice_singletask(series_uids, in_dir, out_dir, src_pattern, dst_pattern):
         for series_uid in tqdm(series_uids):
             src_file = os.path.join(in_dir, series_uid, src_pattern)
@@ -464,7 +465,8 @@ class DatasetsUtils:
             except Exception as e:
                 print(e)
                 print('====> Error when process {}!'.format(series_uid))
-
+    
+    @staticmethod
     def pairs_split_3d_to_2d_slice_multiprocess(indir, outdir, src_pattern, dst_pattern, process_num=5):
         
         series_uids = os.listdir(indir)
