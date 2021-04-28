@@ -10,6 +10,7 @@ import os
 sys.path.append(os.path.join(os.path.dirname(__file__), os.path.pardir))
 from datasets.common_ds import GANDataWrapper, get_common_transform
 
+import SimpleITK as sitk
 
 # 1. 尝试连接服务
 url = '10.100.37.100:8700'
@@ -39,6 +40,10 @@ results = triton_client.infer(model_name,
                                 inputs,
                                 outputs=outputs)
 
-
+output = results.as_numpy('OUTPUT__0')[0][0]
+output = np.array(output, dtype=np.int16)
+sitk_img = sitk.GetImageFromArray(output)
+os.makedirs('./results', exist_ok=True)
+sitk.WriteImage(sitk_img, './results/tritonserver_model_test.nii.gz')
 
 print('hello world')

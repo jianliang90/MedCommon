@@ -364,11 +364,15 @@ def test_add_extrat_region_by_mask():
     fg_img_file = os.path.join(root, 'real_B.nii')
     mask_file = os.path.join(mask_root, 'mask_pred_connected.nii.gz')
 
+    bg_img_file = '/data/medical/hospital/huadong/copd/copd_gan/data_412/images/inference_result_final/1.3.12.2.1107.5.1.4.73793.30000017091723391141600066212/real_A.nii'
+    fg_img_file = '/data/medical/hospital/huadong/copd/copd_gan/data_412/images/inference_result_final/1.3.12.2.1107.5.1.4.73793.30000017091723391141600066212/real_B.nii'
+    mask_file = '/data/medical/hospital/huadong/copd/copd_gan/data_412/images/registried_exp/1.3.12.2.1107.5.1.4.73793.30000017091723391141600066212/mask_pred_connected.nii.gz'
+
     bg_sitk_img = sitk.ReadImage(bg_img_file)
     fg_sitk_img = sitk.ReadImage(fg_img_file)
     sitk_mask = sitk.ReadImage(mask_file)
 
-    bg_sitk_img = ImagePostProcessingUtils.add_extract_region_by_mask(bg_sitk_img, fg_sitk_img, sitk_mask, 0, mask_label=[1,2])
+    bg_sitk_img = ImagePostProcessingUtils.add_extract_region_by_mask(bg_sitk_img, fg_sitk_img, sitk_mask, -10000, mask_label=[1,2])
 
     os.makedirs(out_root, exist_ok=True)
     sitk.WriteImage(bg_sitk_img, os.path.join(out_root, 'real_exhale_only_lung.nii.gz'))

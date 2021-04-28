@@ -39,6 +39,21 @@
         },
 
         {
+            "name": "common: chamber seg",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "cwd": "${fileDirname}",
+            "env": {
+                "CUDA_VISIBLE_DEVICES": "4"
+            },
+            "args": [
+                
+            ]
+        },
+
+        {
             "name": "common: gan pix2pix",
             "type": "python",
             "request": "launch",
@@ -60,7 +75,6 @@
                 "--ndf", "8",
                 "--display_port", "8098", 
                 "--display_server", "10.100.37.21",
-                "--epoch", "10000",
                 "--display_freq", "1", 
                 "--print_freq", "1",
                 "--lambda_L1", "1",
