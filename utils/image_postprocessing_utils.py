@@ -129,7 +129,7 @@ class ImagePostProcessingUtils:
 
 
     @staticmethod
-    def add_region_by_mask(bg_stik_image, fg_sitk_image, sitk_mask, default_value=0, mask_label=None):
+    def add_region_by_mask(bg_stik_image, fg_sitk_image, sitk_mask, default_value=0, mask_label=None, is_negative=False):
         sitk_mask_new = ImagePostProcessingUtils.fix_mask_label(sitk_mask, mask_label)
         # sitk_mask_new = sitk_mask
         mask_arr = sitk.GetArrayFromImage(sitk_mask_new)
@@ -139,7 +139,10 @@ class ImagePostProcessingUtils:
         # bg_arr[mask_arr == mask_label] = 0
         fg_arr[mask_arr != 1] = 0
 
-        bg_arr = bg_arr + fg_arr
+        if is_negative:
+            bg_arr = bg_arr - fg_arr
+        else:
+            bg_arr = bg_arr + fg_arr
 
         out_img = sitk.GetImageFromArray(bg_arr)
         out_img.CopyInformation(bg_stik_image) 
@@ -147,14 +150,17 @@ class ImagePostProcessingUtils:
         return out_img
 
     @staticmethod
-    def add_extract_region_by_mask(bg_stik_image, fg_sitk_image, sitk_mask, default_value=0, mask_label=None):
+    def add_extract_region_by_mask(bg_stik_image, fg_sitk_image, sitk_mask, default_value=0, mask_label=None, is_negative=False):
         sitk_mask_new = ImagePostProcessingUtils.fix_mask_label(sitk_mask, mask_label)
 
         bg_stik_image = sitk.Cast(bg_stik_image, sitk.sitkInt16)
         fg_sitk_image = sitk.Cast(fg_sitk_image, sitk.sitkInt16)
 
         # add 
-        add_filter = sitk.AddImageFilter()
+        if is_negative:
+            add_filter = sitk.SubtractImageFilter()
+        else:
+            add_filter = sitk.AddImageFilter()
         out_img = add_filter.Execute(bg_stik_image, fg_sitk_image)
         out_img.CopyInformation(bg_stik_image)
 
