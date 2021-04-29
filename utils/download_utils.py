@@ -291,6 +291,15 @@ class DownloadUtils:
         DownloadUtils.download_label(download_path, series_ids, urls)
 
     @staticmethod
+    def download_masks_batch(anno_root, out_path):
+        anno_files = []
+        anno_files += glob(os.path.join(anno_root, '*/image_anno_TASK_*.csv'))
+        anno_files += glob(os.path.join(anno_root, 'image_anno_TASK_*.csv'))
+        print('====> files processed:\t', anno_files)
+        for anno_file in anno_files:
+            DownloadUtils.download_mha_with_csv(out_path, anno_file)
+
+    @staticmethod
     def get_series_uids(infile, column_name='序列编号', outfile=None):
         '''
 
@@ -307,6 +316,20 @@ class DownloadUtils:
             with open(outfile, 'w') as f:
                 f.write('\n'.join(series_uids))
         return series_uids
+
+    @staticmethod
+    def get_series_uids_batch(anno_root, out_file, anno_pattern='image_anno_TASK_*.csv'):
+        anno_files = []
+        anno_files = glob(os.path.join(anno_root, 'image_anno_TASK_*.csv'))
+        anno_files += glob(os.path.join(anno_root, '*/image_anno_TASK_*.csv'))
+        
+        series_uids = []
+        for anno_file in anno_files:
+            series_uids += get_series_uids(anno_file)
+        os.makedirs(os.path.dirname(out_file), exist_ok=True)
+        with open(out_file, 'w') as f:
+            f.write('\n'.join(series_uids))
+        
 
     @staticmethod
     def rename_mask_files(indir, outdir, config_file):
@@ -331,12 +354,25 @@ class DownloadUtils:
             shutil.copyfile(src_file, dst_file)
             print('copy from {} to {}'.format(src_file, dst_file))
         
+    @staticmethod
+    def rename_mask_files_batch(indir, outdir, anno_root):
+        anno_files = []
+        anno_files = glob(os.path.join(anno_root, 'image_anno_TASK_*.csv'))
+        anno_files += glob(os.path.join(anno_root, '*/image_anno_TASK_*.csv'))
 
+        print('====> files processed:\t', anno_files)
+        for anno_file in anno_files:
+            DownloadUtils.rename_mask_files(indir, outdir, anno_file)               
 
 def test_download_dcms_with_website_multiprocess():
     download_pth = '/fileser/zhangwd/data/hospital/huadong/copd/copd_gan/data_457/images/inhale'
     config_file = '/fileser/zhangwd/data/hospital/huadong/copd/copd_gan/data_457/annotation/文件内网地址信息-导出结果_inhale.csv'
-    download_dcms_with_website_multiprocess(download_pth, config_file)
+    DownloadUtils.download_dcms_with_website_multiprocess(download_pth, config_file)
+
+def test_download_masks_batch():
+    anno_root = '/fileser/zhangwd/data/brain/Cerebrovascular/segmenation/annotation/anno_table'
+    out_path = '/fileser/zhangwd/data/brain/Cerebrovascular/segmenation/masks'
+    DownloadUtils.download_masks_batch(anno_root, out_path)
 
 
 if __name__ == '__main__':
