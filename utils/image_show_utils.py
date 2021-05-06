@@ -1,5 +1,7 @@
 import os
 import sys
+import numpy as np
+import cv2
 
 class ImageShowUtils:
     def __init__(self):
@@ -13,7 +15,7 @@ class ImageShowUtils:
         out_arr = (out_arr-min_v)/ww*255
         cv2.imwrite(out_file, out_arr)
 
-    def save_volume_to_jpg(in_arr, out_root, ww, wl, axis=0, file_prefix=None):
+    def save_volume_to_jpg(in_arr, out_root, ww, wl, axis=0, file_prefix=None, reverse=False):
         '''
         in_arr = sitk.GetArrayFromImage(sitk_image)
 
@@ -21,6 +23,7 @@ class ImageShowUtils:
         a-p: axis=1
         l-r: axis=2
         '''
+        os.makedirs(out_root, exist_ok=True)
         n = in_arr.shape[axis]
         for i in range(n):
             if file_prefix:
@@ -34,6 +37,8 @@ class ImageShowUtils:
                 tmp_arr = in_arr[:,i,:]
             else:
                 tmp_arr = in_arr[:,:,i]
+            if reverse:
+                tmp_arr = tmp_arr[::-1,:]
             ImageShowUtils.save_img(tmp_arr, sub_file_name, ww, wl)
 
 
