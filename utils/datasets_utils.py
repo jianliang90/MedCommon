@@ -499,6 +499,52 @@ class DatasetsUtils:
         pool.close()
         pool.join()
 
+    @staticmethod
+    def sitk_resample_to_image(image, reference_image, interpolator, default_value=0., transform=None,
+                            output_pixel_type=None):
+        if transform is None:
+            transform = sitk.Transform()
+            transform.SetIdentity()
+        if output_pixel_type is None:
+            output_pixel_type = image.GetPixelID()
+        resample_filter = sitk.ResampleImageFilter()
+        resample_filter.SetInterpolator(interpolator)
+        resample_filter.SetTransform(transform)
+        resample_filter.SetOutputPixelType(output_pixel_type)
+        resample_filter.SetDefaultPixelValue(default_value)
+        resample_filter.SetReferenceImage(reference_image)
+        return resample_filter.Execute(image)
+
+    @staticmethod
+    def calculate_origin_offset(new_spacing, old_spacing):
+        return np.subtract(new_spacing, old_spacing)/2
+
+    @staticmethod
+    def sitk_new_blank_image(size, spacing, direction, origin, default_value=0.):
+        image = sitk.GetImageFromArray(np.ones(size, dtype=np.float).T * default_value)
+        image.SetSpacing(spacing)
+        image.SetDirection(direction)
+        image.SetOrigin(origin)
+        return image
+
+    @staticmethod
+    def sitk_resample_to_spacing(image, new_spacing=(1.0, 1.0, 1.0), interpolator=sitk.sitkLinear, default_value=0.):
+        zoom_factor = np.divide(image.GetSpacing(), new_spacing)
+        new_size = np.asarray(np.ceil(np.round(np.multiply(zoom_factor, image.GetSize()), decimals=5)), dtype=np.int16)
+        offset = DatasetsUtils.calculate_origin_offset(new_spacing, image.GetSpacing())
+        reference_image = DatasetsUtils.sitk_new_blank_image(size=new_size, spacing=new_spacing, direction=image.GetDirection(),
+                                            origin=image.GetOrigin() + offset, default_value=default_value)
+        return DatasetsUtils.sitk_resample_to_image(image, reference_image, interpolator=interpolator, default_value=default_value)
+
+
+    @staticmethod
+    def resample_unified_spacing_x(image, interpolator=sitk.sitkLinear, default_value=0.):
+        spacing = image.GetSpacing()
+        new_spacing = [0.0 for i in range(3)]
+        x_spac = spacing[0]
+        new_image = DatasetsUtils.sitk_resample_to_spacing(image, [x_spac, x_spac, x_spac], interpolator, default_value)
+        return new_image
+
 
 def test_resample_image_mask_unsame_resolution_multiprocess():
     
@@ -682,12 +728,29 @@ def test_crop_image_mask_with_padding():
 
 def test_pairs_split_3d_to_2d_slice_multiprocess():
     # 华东COPD
-    indir = '/data/zhangwd/data/lung/copd/copd_412/images/out_pairs'
+    indir = '/data/medical/lung/copd/copd_412/images/out_pairs'
     outdir = '/fileser/zhangwd/data/hospital/huadong/copd/copd_gan/data_412/images/slice'
     src_pattern = 'image_raw.nii.gz'
     dst_pattern = 'substraction.nii.gz'
     
     DatasetsUtils.pairs_split_3d_to_2d_slice_multiprocess(indir, outdir, src_pattern, dst_pattern)
+
+
+def test_sitk_resample_to_spacing():
+    infile = '/data/medical/hospital/huadong/copd/copd_gan/data_412/images/inference_result_final_postprocessed_subtract/1.3.12.2.1107.5.1.4.73793.30000017062300142044800033167/inhale_lung.nii.gz'
+    out_dir = '/data/medical/tmp'
+    os.makedirs(out_dir, exist_ok=True)
+    out_file = os.path.join(out_dir, 'tmp.nii.gz')
+
+    image = sitk.ReadImage(infile)
+    new_image = DatasetsUtils.sitk_resample_to_spacing(image)
+
+    sitk.WriteImage(new_image, out_file)
+
+    new_image = DatasetsUtils.resample_unified_spacing_x(image)
+    sitk.WriteImage(new_image, out_file)
+
+
 
 if __name__ == '__main__':
     # test_resample_image_mask_unsame_resolution_multiprocess()
@@ -695,5 +758,5 @@ if __name__ == '__main__':
     # test_cut_image_into_blocks_by_sliding_window()
     # test_extend_image_mask_boundary_for_seg()
     # test_crop_image_mask_with_padding()
-    test_pairs_split_3d_to_2d_slice_multiprocess()
-
+    # test_pairs_split_3d_to_2d_slice_multiprocess()
+    test_sitk_resample_to_spacing()
