@@ -539,11 +539,25 @@ class DatasetsUtils:
 
     @staticmethod
     def resample_unified_spacing_x(image, interpolator=sitk.sitkLinear, default_value=0.):
+        '''
+        将图像重采样到指定的分辨率，这里以x方向的分辨率作为基准
+        '''
         spacing = image.GetSpacing()
         new_spacing = [0.0 for i in range(3)]
         x_spac = spacing[0]
         new_image = DatasetsUtils.sitk_resample_to_spacing(image, [x_spac, x_spac, x_spac], interpolator, default_value)
         return new_image
+
+    @staticmethod
+    def resample_unified_spacing_x_default_min(image, interpolator=sitk.sitkLinear):
+        '''
+        将图像重采样到指定的分辨率，这里以x方向的分辨率作为基准, 空白区域默认为最小值
+        '''
+        min_value = sitk.GetArrayFromImage(image).min()
+        new_image = DatasetsUtils.resample_unified_spacing_x(image, interpolator, float(min_value))
+
+        return new_image
+        
 
 
 def test_resample_image_mask_unsame_resolution_multiprocess():
@@ -743,11 +757,17 @@ def test_sitk_resample_to_spacing():
     out_file = os.path.join(out_dir, 'tmp.nii.gz')
 
     image = sitk.ReadImage(infile)
+    
+    # 重采样，分辨率为1mm
     new_image = DatasetsUtils.sitk_resample_to_spacing(image)
-
     sitk.WriteImage(new_image, out_file)
 
+    # 重采样，分辨率为x方向的分辨率
     new_image = DatasetsUtils.resample_unified_spacing_x(image)
+    sitk.WriteImage(new_image, out_file)
+
+    # 重采样，分辨率为x方向的分辨率，空白区域的默认值为原始图像的最小值
+    new_image = DatasetsUtils.resample_unified_spacing_x_default_min(image)
     sitk.WriteImage(new_image, out_file)
 
 
