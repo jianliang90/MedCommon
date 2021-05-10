@@ -37,6 +37,6 @@ from utils.download_utils import DownloadUtils
 
 # 4. rename the mask to match the corresponding image
 indir = os.path.join(DATA_ROOT, 'masks')
-outdir = os.path.join(DATA_ROOT, 'masks')
+outdir = os.path.join(DATA_ROOT, 'renamed_masks')
 anno_root = os.path.join(DATA_ROOT, 'annotation/anno_table')
 DownloadUtils.rename_mask_files_batch(indir, outdir, anno_root)
