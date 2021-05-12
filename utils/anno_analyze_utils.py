@@ -19,8 +19,8 @@ class DetectionAnnotationAnalyzeUtils:
         return pixel_coord
 
     def extract_block_around_center(arr, center_coord, block_size):
-        boundary_min = [center_coord[i]-block_size//2 for i in range(3)]
-        boundary_max = [center_coord[i]+block_size for i in range(3)]
+        boundary_min = [max(0, center_coord[i]-block_size//2) for i in range(3)]
+        boundary_max = [min(center_coord[i]+block_size, arr.shape[i]) for i in range(3)]
 
         return arr[boundary_min[2]:boundary_max[2], boundary_min[1]:boundary_max[1], boundary_min[0]:boundary_max[0]]
 
