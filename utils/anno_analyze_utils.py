@@ -44,10 +44,13 @@ def test_DetectionAnnotationAnalyzeUtils():
 
     pt1_col_name = ['x1', 'y1', 'z1']
     pt2_col_name = ['x2', 'y2', 'z2']
-    coord_pt1 = df.iloc[0][pt1_col_name]
-    coord_pt2 = df.iloc[0][pt2_col_name]
 
-    image_file = '/data/zhaokeyang/Lung_GGO/1.2.840.113704.1.111.12024.1478508832.15'
+    index = df['series uid'].to_list().index('1.3.46.670589.33.1.63602016093241541400001.5555111662490526388')
+
+    coord_pt1 = df.iloc[index][pt1_col_name]
+    coord_pt2 = df.iloc[index][pt2_col_name]
+
+    image_file = '/data/zhaokeyang/Lung_GGO/{}'.format(df.iloc[index]['series uid'])
     image = DataIO.load_dicom_series(image_file)['sitk_image']
 
     pix_coord_center = DetectionAnnotationAnalyzeUtils.PysicalCoordinate2PixelCoordinate(coord_center, image)
