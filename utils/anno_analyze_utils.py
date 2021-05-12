@@ -20,7 +20,7 @@ class DetectionAnnotationAnalyzeUtils:
 
     def extract_block_around_center(arr, center_coord, block_size):
         boundary_min = [max(0, center_coord[i]-block_size//2) for i in range(3)]
-        boundary_max = [min(center_coord[i]+block_size, arr.shape[3-i]) for i in range(3)]
+        boundary_max = [min(center_coord[i]+block_size, arr.shape[2-i]) for i in range(3)]
 
         return arr[boundary_min[2]:boundary_max[2], boundary_min[1]:boundary_max[1], boundary_min[0]:boundary_max[0]]
 
