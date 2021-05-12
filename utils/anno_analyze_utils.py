@@ -20,7 +20,7 @@ class DetectionAnnotationAnalyzeUtils:
 
     def extract_block_around_center(arr, center_coord, block_size):
         boundary_min = [max(0, center_coord[i]-block_size//2) for i in range(3)]
-        boundary_max = [min(center_coord[i]+block_size, arr.shape[i]) for i in range(3)]
+        boundary_max = [min(center_coord[i]+block_size, arr.shape[3-i]) for i in range(3)]
 
         return arr[boundary_min[2]:boundary_max[2], boundary_min[1]:boundary_max[1], boundary_min[0]:boundary_max[0]]
 
@@ -40,13 +40,14 @@ def test_DetectionAnnotationAnalyzeUtils():
     df = pd.read_excel(anno_file, sheet_name=1)
 
     center_col_name = ['coordX', 'coordY', 'coordZ']
-    coord_center = df.iloc[0][center_col_name]
 
     pt1_col_name = ['x1', 'y1', 'z1']
     pt2_col_name = ['x2', 'y2', 'z2']
 
-    index = df['series uid'].to_list().index('1.3.46.670589.33.1.63602016093241541400001.5555111662490526388')
+    # index = df['series uid'].to_list().index('1.3.46.670589.33.1.63602016093241541400001.5555111662490526388')
+    index = df['series uid'].to_list().index('1.2.392.200036.9116.2.2.2.1762671075.1411351131.360464')
 
+    coord_center = df.iloc[index][center_col_name]
     coord_pt1 = df.iloc[index][pt1_col_name]
     coord_pt2 = df.iloc[index][pt2_col_name]
 
