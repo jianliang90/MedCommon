@@ -23,6 +23,8 @@ class DistributedUtils:
 
         args.distributed = True
 
+        print(args.gpu)
+
         torch.cuda.set_device(args.gpu)
         args.dist_backend = 'nccl'  # 通信后端，nvidia GPU推荐使用NCCL
         print('| distributed init (rank {}): {}'.format(

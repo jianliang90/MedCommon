@@ -10,3 +10,6 @@
 [submodule "external_lib/torchio"]
 	path = external_lib/torchio
 	url = https://github.com/searobbersduck/torchio.git
+[submodule "external_lib/ResNets3D"]
+	path = external_lib/ResNets3D
+	url = https://github.com/kenshohara/3D-ResNets-PyTorch.git

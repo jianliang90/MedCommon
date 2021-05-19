@@ -569,10 +569,12 @@ def test_resample_image_mask_unsame_resolution_multiprocess():
     image_root = '/fileser/zhangwd/data/cardiac/chamber/seg/chamber_seg/images'
     mask_root = '/fileser/zhangwd/data/cardiac/chamber/seg/chamber_seg/masks'
 
-    dst_image_root = '/fileser/zhangwd/data/cardiac/chamber/seg/chamber_seg_resampled_unified/images'
-    dst_mask_root = '/fileser/zhangwd/data/cardiac/chamber/seg/chamber_seg_resampled_unified/masks'
-
-    dst_size = [128, 128, 128]
+    # dst_image_root = '/fileser/zhangwd/data/cardiac/chamber/seg/chamber_seg_resampled_unified/images'
+    # dst_mask_root = '/fileser/zhangwd/data/cardiac/chamber/seg/chamber_seg_resampled_unified/masks'
+    # dst_size = [128, 128, 128]
+    dst_image_root = '/fileser/zhangwd/data/cardiac/chamber/seg/chamber_seg_resampled_unified_256/images'
+    dst_mask_root = '/fileser/zhangwd/data/cardiac/chamber/seg/chamber_seg_resampled_unified_256/masks'
+    dst_size = [256, 256, 256]
 
     image_postfix = '.nii.gz'
     mask_postfix = '.nii.gz'
@@ -773,10 +775,10 @@ def test_sitk_resample_to_spacing():
 
 
 if __name__ == '__main__':
-    # test_resample_image_mask_unsame_resolution_multiprocess()
+    test_resample_image_mask_unsame_resolution_multiprocess()
     # test_restore_ori_image_from_resampled_image()
     # test_cut_image_into_blocks_by_sliding_window()
     # test_extend_image_mask_boundary_for_seg()
     # test_crop_image_mask_with_padding()
     # test_pairs_split_3d_to_2d_slice_multiprocess()
-    test_sitk_resample_to_spacing()
+    # test_sitk_resample_to_spacing()
