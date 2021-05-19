@@ -50,6 +50,39 @@ class MaskBoundingUtils:
             os.makedirs(os.path.dirname(out_file), exist_ok=True)
             DataIO.save_medical_info_and_data(target_arr, data['origin'], data['spacing'], data['direction'], out_file)
 
+    @staticmethod
+    def extract_segmentation_pairs_by_boundary_info(in_image_file, in_mask_file, 
+            out_image_file, out_mask_file, boundary_info, is_dcm=False):
+        '''
+        boudary_info: [min_z, min_y, min_x, max_z, max_y, max_x], make sure, boundary_info is valid!!!!!
+        '''
+        if is_dcm:
+            image_data = DataIO.load_dicom_series(in_image_file)
+        else:
+            image_data = DataIO.load_nii_image(in_image_file)
+        mask_data = DataIO.load_nii_image(in_mask_file)
+        
+        [min_z, min_y, min_x, max_z, max_y, max_x] = boundary_info
+        
+        arr = image_data['image']
+        image_target_arr = arr[min_z:max_z+1, min_y:max_y+1, min_x:max_x+1]
+        out_sitk_image = sitk.GetImageFromArray(image_target_arr)
+        out_sitk_image.SetSpacing(image_data['sitk_image'].GetSpacing())
+        out_sitk_image.SetOrigin(image_data['sitk_image'].GetOrigin())
+        out_sitk_image.SetDirection(image_data['sitk_image'].GetDirection())
+        if out_image_file is not None:
+            os.makedirs(os.path.dirname(out_image_file), exist_ok=True)
+            sitk.WriteImage(out_sitk_image, out_image_file)
+        
+        arr = mask_data['image']
+        mask_target_arr = arr[min_z:max_z+1, min_y:max_y+1, min_x:max_x+1]
+        out_sitk_mask = sitk.GetImageFromArray(mask_target_arr)
+        out_sitk_mask.CopyInformation(out_sitk_image)
+        if out_mask_file is not None:
+            os.makedirs(os.path.dirname(out_mask_file), exist_ok=True)
+            sitk.WriteImage(out_sitk_mask, out_mask_file)
+
+
 
 
 if __name__ == '__main__':
