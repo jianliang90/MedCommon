@@ -35,7 +35,7 @@ class MaskBoundingUtils:
         return z_min, y_min, x_min, z_max, y_max, x_max
 
     @staticmethod
-    def extract_target_area_by_boundary_info(infile, out_file, boundary_info, is_dcm=False):
+    def extract_target_area_by_boundary_info(infile, out_file, boundary_info, is_dcm=False, padding=None):
         '''
         boudary_info: [min_z, min_y, min_x, max_z, max_y, max_x], make sure, boundary_info is valid!!!!!
         '''
@@ -45,14 +45,25 @@ class MaskBoundingUtils:
             data = DataIO.load_nii_image(infile)
         arr = data['image']
         [min_z, min_y, min_x, max_z, max_y, max_x] = boundary_info
-        target_arr = arr[min_z:max_z+1, min_y:max_y+1, min_x:max_x+1]
+        if isinstance(padding, list) and len(padding) == 3:
+            min_z = max(0, min_z-padding[2])
+            min_y = max(0, min_z-padding[1])
+            min_x = max(0, min_z-padding[0])            
+            target_arr = arr[min_z:max_z+1+padding[2], min_y:max_y+1+padding[1], min_x:max_x+1+padding[0]]
+        elif isinstance(padding, int):
+            min_z = max(0, min_z-padding)
+            min_y = max(0, min_z-padding)
+            min_x = max(0, min_z-padding)            
+            target_arr = arr[min_z:max_z+1+padding, min_y:max_y+1+padding, min_x:max_x+1+padding]
+        else:
+            target_arr = arr[min_z:max_z+1, min_y:max_y+1, min_x:max_x+1]
         if out_file is not None:
             os.makedirs(os.path.dirname(out_file), exist_ok=True)
             DataIO.save_medical_info_and_data(target_arr, data['origin'], data['spacing'], data['direction'], out_file)
 
     @staticmethod
     def extract_segmentation_pairs_by_boundary_info(in_image_file, in_mask_file, 
-            out_image_file, out_mask_file, boundary_info, is_dcm=False):
+            out_image_file, out_mask_file, boundary_info, is_dcm=False, padding=None):
         '''
         boudary_info: [min_z, min_y, min_x, max_z, max_y, max_x], make sure, boundary_info is valid!!!!!
         '''
@@ -65,7 +76,22 @@ class MaskBoundingUtils:
         [min_z, min_y, min_x, max_z, max_y, max_x] = boundary_info
         
         arr = image_data['image']
-        image_target_arr = arr[min_z:max_z+1, min_y:max_y+1, min_x:max_x+1]
+        if isinstance(padding, list) and len(padding) == 3:
+            min_z = max(0, min_z-padding[2])
+            min_y = max(0, min_z-padding[1])
+            min_x = max(0, min_z-padding[0])            
+            image_target_arr = arr[min_z:max_z+1+padding[2], min_y:max_y+1+padding[1], min_x:max_x+1+padding[0]]
+        elif isinstance(padding, int):
+            min_z = max(0, min_z-padding)
+            min_y = max(0, min_z-padding)
+            min_x = max(0, min_z-padding)
+
+        if isinstance(padding, list) and len(padding) == 3:           
+            image_target_arr = arr[min_z:max_z+1+padding[2], min_y:max_y+1+padding[1], min_x:max_x+1+padding[0]]
+        elif isinstance(padding, int):          
+            image_target_arr = arr[min_z:max_z+1+padding, min_y:max_y+1+padding, min_x:max_x+1+padding]
+        else:
+            image_target_arr = arr[min_z:max_z+1, min_y:max_y+1, min_x:max_x+1]
         out_sitk_image = sitk.GetImageFromArray(image_target_arr)
         out_sitk_image.SetSpacing(image_data['sitk_image'].GetSpacing())
         out_sitk_image.SetOrigin(image_data['sitk_image'].GetOrigin())
@@ -75,7 +101,12 @@ class MaskBoundingUtils:
             sitk.WriteImage(out_sitk_image, out_image_file)
         
         arr = mask_data['image']
-        mask_target_arr = arr[min_z:max_z+1, min_y:max_y+1, min_x:max_x+1]
+        if isinstance(padding, list) and len(padding) == 3:
+            mask_target_arr = arr[min_z:max_z+1+padding[2], min_y:max_y+1+padding[1], min_x:max_x+1+padding[0]]
+        elif isinstance(padding, int):
+            mask_target_arr = arr[min_z:max_z+1+padding, min_y:max_y+1+padding, min_x:max_x+1+padding]
+        else:
+            mask_target_arr = arr[min_z:max_z+1, min_y:max_y+1, min_x:max_x+1]
         out_sitk_mask = sitk.GetImageFromArray(mask_target_arr)
         out_sitk_mask.CopyInformation(out_sitk_image)
         if out_mask_file is not None:
