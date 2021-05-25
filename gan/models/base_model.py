@@ -210,7 +210,7 @@ class BaseModel(ABC):
                     self.__patch_instance_norm_state_dict(state_dict, net, key.split('.'))
                 net.load_state_dict(state_dict)
 
-        if self.opt.distributed:
+        if 'distributed' in self.opt and self.opt.distributed:
             torch.distributed.barrier()
 
     def print_networks(self, verbose):
