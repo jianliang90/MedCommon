@@ -39,6 +39,72 @@
         },
 
         {
+            "name": "common: cerebravascular seg",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "cwd": "${fileDirname}",
+            "env": {
+                "CUDA_VISIBLE_DEVICES": "4"
+            },
+            "args": [
+                "--dataroot", "/data/medical/brain/Cerebrovascular/segmenation_erode_k1", 
+                "--num_classes", "2", 
+                "--base_n_filter", "6", 
+                "--lr", "1e-3",
+                "--n_epochs", "200", 
+                "--crop_size", "32", "32", "32",
+                "--weights", "/data/medical/brain/Cerebrovascular/segmenation_erode_k1/checkpoints/cerebravascular/common_seg_epoch_187_train_0.044", 
+                "--name", "cerebravascular_seg"
+            ]
+        },
+
+        {
+            "name": "common: airway fine segmentation",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "cwd": "${fileDirname}",
+            "env": {
+                "CUDA_VISIBLE_DEVICES": "7"
+            },
+            "args": [
+                "--dataroot", "/data/medical/lung/airway/segmentation", 
+                "--num_classes", "2", 
+                "--base_n_filter", "6", 
+                "--lr", "1e-3",
+                "--n_epochs", "200", 
+                "--crop_size", "32", "32", "32",
+                "--weights", "/data/medical/lung/airway/segmentation/checkpoints/airway/common_seg_epoch_183_train_0.054", 
+                "--name", "airway"
+            ]
+        },
+
+        {
+            "name": "common: coronary fine segmentation",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "cwd": "${fileDirname}",
+            "env": {
+                "CUDA_VISIBLE_DEVICES": "7"
+            },
+            "args": [
+                "--dataroot", "/data/medical/cardiac/seg/coronary/coronary_cropped_by_mask", 
+                "--num_classes", "2", 
+                "--base_n_filter", "6", 
+                "--lr", "1e-3",
+                "--n_epochs", "200", 
+                "--crop_size", "32", "32", "32",
+                "--weights", "/data/medical/cardiac/seg/coronary/coronary_cropped_by_mask/checkpoints/coronary/common_seg_epoch_28_train_0.069", 
+                "--name", "coronary"
+            ]
+        },
+
+        {
             "name": "common: chamber seg",
             "type": "python",
             "request": "launch",
@@ -80,6 +146,45 @@
                 "--lambda_L1", "1",
                 "--save_latest_freq", "5000",
             ]
-        }
+        }, 
+        
+        {
+            "name": "common: gan pix2pix inference",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "cwd": "${fileDirname}",
+            "env": {
+                "CUDA_VISIBLE_DEVICES": "4"
+            },
+            "args": [
+                "--dataroot", "xxx",
+                "--model", "pix2pix_3d", 
+                "--input_nc", "1", 
+                "--output_nc", "1", 
+                "--ngf", "32",
+                "--netG", "resnet_6blocks",
+                "--no_dropout",
+                "--netD", "pixel",
+                "--ndf", "8",
+                "--results_dir", "/data/medical/cardiac/cta2mbf/data_114_20210318/6.inference"
+            ]
+        }, 
+
+        {
+            "name": "common: regression detection",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "cwd": "${fileDirname}",
+            "env": {
+                "CUDA_VISIBLE_DEVICES": "4"
+            },
+            "args": [
+                
+            ]
+        },
     ]
 }
