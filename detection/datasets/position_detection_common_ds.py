@@ -102,6 +102,6 @@ def test_PositionDetectionDS():
 
 if __name__ == '__main__':
     # extract_boundary_info(mask_root='/data/medical/brain/cerebral_parenchyma/exp/cta/masks', out_file='/data/medical/brain/cerebral_parenchyma/exp/cta/config/mask_boundary_info.json')
-    extract_boundary_info(mask_root='/data/medical/cardiac/seg/coronary/coronary_ori/masks', out_file='/data/medical/cardiac/seg/coronary/coronary_ori/config/mask_boundary_info.json')
-    # test_PositionDetectionDS()
+    # extract_boundary_info(mask_root='/data/medical/cardiac/seg/coronary/coronary_ori/masks', out_file='/data/medical/cardiac/seg/coronary/coronary_ori/config/mask_boundary_info.json')
+    test_PositionDetectionDS()
 

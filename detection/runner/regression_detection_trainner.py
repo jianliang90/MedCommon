@@ -19,7 +19,11 @@ from utils.lr_adjust_utils import LR_ADJUST_UTILS
 from detection.models.detection_auto_resample import RegressionDetecter
 from detection.datasets.position_detection_common_ds import PositionDetectionDS
 from utils.detection_utils import PYTORCH_TENSOR_DETECTION_UTILS
+from utils.detection_utils import DETECTION_UTILS
 from torch.utils.data import Dataset, DataLoader
+
+from utils.data_io_utils import DataIO
+import SimpleITK as sitk
 
 import argparse
 
@@ -65,7 +69,7 @@ class RegressionDetectionTrainer:
             else:
                 iou,_ = PYTORCH_TENSOR_DETECTION_UTILS.calc_brick_iou(output, targets.view(targets.shape[0],-1).cuda())
                 l1_loss = torch.nn.L1Loss()(output, targets.view(targets.shape[0],-1).cuda())
-                loss = l1_loss + (1-iou.mean())
+                loss = l1_loss*10 + (1-iou.mean())
                 ious = np.append(ious, iou.detach().cpu())
             if phase == 'train':
                 optimizer.zero_grad()
@@ -84,6 +88,39 @@ class RegressionDetectionTrainer:
                     logger.append(print_info)
         return ious                                         
 
+    @staticmethod
+    def load_model(opts):
+        n_objects = opts.n_objects
+        net_args = {
+            'input_size': [128, 128, 128], 
+            'arch':opts.arch
+        }
+        model = RegressionDetecter(n_objects, net_args)
+        if opts.weights:
+            model.load_state_dict(torch.load(opts.weights, map_location='cpu'))
+        return model
+
+    def inference_one_case(model, series_path, is_dcm=True, dst_size = [128, 128, 128]):
+        model.eval()
+
+        if is_dcm:
+            image_data = DataIO.load_dicom_series(series_path)
+        else:
+            image_data = DataIO.load_nii_image(series_path)        
+        image = image_data['sitk_image']
+
+        image_arr = sitk.GetArrayFromImage(image)
+        image_tensor = torch.from_numpy(image_arr).unsqueeze(0).unsqueeze(0).float()
+        with torch.no_grad():
+            output = model(image_tensor.cuda())
+        z_min, y_min, x_min, z_max, y_max, x_max = output.detach().cpu().numpy()[0]
+        image_shape = image.GetSize()
+        out_coord_min = DETECTION_UTILS.restore_normalized_coordinate([x_min, y_min, z_min], image_shape)
+        out_coord_max = DETECTION_UTILS.restore_normalized_coordinate([x_max, y_max, z_max], image_shape)
+        print('hello world')
+        
+
+
 def train():
     opts = parse_args()
     root = opts.dataroot
@@ -97,7 +134,8 @@ def train():
         'arch':opts.arch
     }
     model = RegressionDetecter(n_objects, net_args)
-
+    if opts.weights:
+        model.load_state_dict(torch.load(opts.weights, map_location='cpu'))
     criterion = None
     lr = opts.lr
     optimizer = torch.optim.Adam(model.parameters(), lr=opts.lr)
@@ -119,7 +157,12 @@ def train():
         
     print('hello world!')
     
-
+def inference(infile, weights=None):
+    opts = parse_args()
+    if weights:
+        opts.weights = weights
+    model = RegressionDetectionTrainer.load_model(opts)
+    RegressionDetectionTrainer.inference_one_case(model.cuda(), infile, False)    
 
 def test_RegressionDetectionTrainer():
     root = '/data/medical/brain/cerebral_parenchyma/exp/cta'
@@ -147,3 +190,4 @@ def test_RegressionDetectionTrainer():
 if __name__ == '__main__':
     # test_RegressionDetectionTrainer()
     train()
+    # inference('/data/medical/brain/cerebral_parenchyma/exp/cta/images/1.3.12.2.1107.5.1.4.60320.30000018121200035049700008803.nii.gz', '/home/zhangwd/code/work/MedCommon/detection/runner/checkpoints/experiment_name/common_det_epoch_58_train_0.832')

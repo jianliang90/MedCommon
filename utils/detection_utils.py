@@ -46,6 +46,18 @@ class DETECTION_UTILS:
         out_coord = [out_shape[i]/in_shape[i]*in_coord[i] for i in range(3)]
         return out_coord
 
+    @staticmethod
+    def point_coordinate_resampled_normalized(in_shape, out_shape, in_coord):
+        '''
+        '''
+        out_coord = [1/in_shape[i]*in_coord[i] for i in range(3)]
+        return out_coord
+
+    @staticmethod
+    def restore_normalized_coordinate(in_normalized_coord, in_shape):
+        out_coord = [in_normalized_coord[i] * in_shape[i] for i in range(3)]
+        return out_coord
+
 
     @staticmethod
     def generate_test_bricks(n):
