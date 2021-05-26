@@ -180,7 +180,7 @@
             "console": "integratedTerminal",
             "cwd": "${fileDirname}",
             "env": {
-                "CUDA_VISIBLE_DEVICES": "4"
+                "CUDA_VISIBLE_DEVICES": "1"
             },
             "args": [
                 
