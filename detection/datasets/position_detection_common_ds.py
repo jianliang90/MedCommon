@@ -9,6 +9,7 @@ sys.path.append(os.path.join(MEDCOMMON_ROOT, 'external_lib'))
 from utils.data_io_utils import DataIO
 from utils.mask_bounding_utils import MaskBoundingUtils
 from utils.detection_utils import DETECTION_UTILS
+from utils.datasets_utils import DatasetsUtils
 import SimpleITK as sitk
 
 import torch
@@ -34,6 +35,19 @@ def extract_boundary_info(mask_root, out_file):
         f.write(json.dumps(info_dict))
     print('====> extract_boundary_info finished!')
     
+def generate_resampled_pairs_unsame_resolution(data_root, out_root, dst_size):
+    image_root = os.path.join(data_root, 'images')
+    mask_root = os.path.join(data_root, 'masks')
+    out_image_root = os.path.join(out_root, 'images')
+    out_mask_root = os.path.join(out_root, 'masks')
+    image_postfix='.nii.gz'
+    mask_postfix='.nii.gz'
+
+    DatasetsUtils.resample_image_mask_unsame_resolution_multiprocess(
+        image_root, mask_root, 
+        out_image_root, out_mask_root, dst_size, 
+        image_postfix, mask_postfix
+    )
 
 
 class PositionDetectionDS(Dataset):
@@ -103,5 +117,13 @@ def test_PositionDetectionDS():
 if __name__ == '__main__':
     # extract_boundary_info(mask_root='/data/medical/brain/cerebral_parenchyma/exp/cta/masks', out_file='/data/medical/brain/cerebral_parenchyma/exp/cta/config/mask_boundary_info.json')
     # extract_boundary_info(mask_root='/data/medical/cardiac/seg/coronary/coronary_ori/masks', out_file='/data/medical/cardiac/seg/coronary/coronary_ori/config/mask_boundary_info.json')
-    test_PositionDetectionDS()
+
+    extract_boundary_info(mask_root='/data/medical/brain/cerebral_parenchyma/exp/cta_256/masks', out_file='/data/medical/brain/cerebral_parenchyma/exp/cta_256/config/mask_boundary_info.json')
+    extract_boundary_info(mask_root='/data/medical/cardiac/seg/coronary/coronary_ori_256/masks', out_file='/data/medical/cardiac/seg/coronary/coronary_ori_256/config/mask_boundary_info.json')
+
+    # test_PositionDetectionDS()
+    
+    # 统一数据尺寸，训练的时候可以并行处理
+    # generate_resampled_pairs_unsame_resolution('/data/medical/brain/cerebral_parenchyma/exp/cta', '/data/medical/brain/cerebral_parenchyma/exp/cta_256', [256,256,256])
+    # generate_resampled_pairs_unsame_resolution('/data/medical/cardiac/seg/coronary/coronary_ori', '/data/medical/cardiac/seg/coronary/coronary_ori_256', [256,256,256])
 

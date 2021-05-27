@@ -33,6 +33,7 @@ def parse_args():
     parser.add_argument('--name', type=str, default='experiment_name', help='name of the experiment. It decides where to store samples and models')
     parser.add_argument('--checkpoints_dir', type=str, default='./checkpoints', help='models are saved here')
     parser.add_argument('--weights', type=str, default=None, help='pretrained weights file')
+    parser.add_argument('--pretrained', type=str, default=None, help='pretrained weights for backbone')
 
     parser.add_argument('--lr', type=float, default=0.0002, help='initial learning rate for adam')
     parser.add_argument('--boundary_info_file', type=str, default='/data/medical/brain/cerebral_parenchyma/exp/cta/config/mask_boundary_info.json', help='file to record mask boundary information')
@@ -93,7 +94,8 @@ class RegressionDetectionTrainer:
         n_objects = opts.n_objects
         net_args = {
             'input_size': [128, 128, 128], 
-            'arch':opts.arch
+            'arch':opts.arch, 
+            'pretrained': opts.pretrained
         }
         model = RegressionDetecter(n_objects, net_args)
         if opts.weights:
@@ -131,7 +133,8 @@ def train():
     n_objects = opts.n_objects
     net_args = {
         'input_size': [128, 128, 128], 
-        'arch':opts.arch
+        'arch':opts.arch, 
+        'pretrained': opts.pretrained
     }
     model = RegressionDetecter(n_objects, net_args)
     if opts.weights:
@@ -190,4 +193,6 @@ def test_RegressionDetectionTrainer():
 if __name__ == '__main__':
     # test_RegressionDetectionTrainer()
     train()
-    # inference('/data/medical/brain/cerebral_parenchyma/exp/cta/images/1.3.12.2.1107.5.1.4.60320.30000018121200035049700008803.nii.gz', '/home/zhangwd/code/work/MedCommon/detection/runner/checkpoints/experiment_name/common_det_epoch_58_train_0.832')
+    # inference('/data/medical/brain/cerebral_parenchyma/exp/cta/images/1.3.12.2.1107.5.1.4.60320.30000018121200035049700008803.nii.gz', '/home/zhangwd/code/work/MedCommon/detection/runner/checkpoints/experiment_name/common_det_epoch_24_train_0.830')
+    # inference('/data/medical/brain/cerebral_parenchyma/exp/cta/images/1.3.12.2.1107.5.1.4.60320.30000018121200035049700008803.nii.gz', '/home/zhangwd/code/work/MedCommon/detection/runner/checkpoints/experiment_name/common_det_epoch_99_train_0.950')
+    
