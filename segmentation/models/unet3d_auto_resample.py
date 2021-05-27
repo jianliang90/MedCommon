@@ -64,12 +64,10 @@ class ResampledUnet3D(nn.Module):
                     m.bias.data.zero_()
 
     def forward(self, x_input):
-        x = self.input(x_input)
-
+        # x = self.input(x_input)
+        x = x_input
         output = self.unet_3d(x)
-
-        output = self.output(output, x_input)
+        # output = self.output(output, x_input)
 
         return output
-
 
