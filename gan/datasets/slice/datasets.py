@@ -78,8 +78,8 @@ class GAN_SLICE_DS(Dataset):
 
 
 def test_GAN_SLICE_DS():
-    data_root = '/fileser/zhangwd/data/hospital/huadong/copd/copd_gan/data_412/images/slice'
-    config_data_file = '/fileser/zhangwd/data/hospital/huadong/copd/copd_gan/data_412/annotation/config/slice/train.txt'
+    data_root = '/data/medical/hospital/huadong/copd/copd_gan/data_412/images/slice'
+    config_data_file = '/data/medical/hospital/huadong/copd/copd_gan/data_412/annotation/config/slice/train.txt'
     phase = 'train'
     crop_size = 512
     scale_size = 512

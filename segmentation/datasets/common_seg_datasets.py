@@ -156,8 +156,8 @@ def generate_resampled_pairs_unsame_resolution(data_root, out_root, dst_size):
 
 def test_CommonSeg_DS():
     from tqdm import tqdm
-    data_root = '/fileser/zhangwd/data/lung/changzheng/airway/airway_20201030/paires_croped_by_airway_anno/'
-    config_file = '/fileser/zhangwd/data/lung/changzheng/airway/airway_20201030/config/train.txt'
+    data_root = '/data/medical/lung/changzheng/airway/airway_20201030/paires_croped_by_airway_anno/'
+    config_file = '/data/medical/lung/changzheng/airway/airway_20201030/config/train.txt'
     crop_size = [128, 128, 128]
 
     ds = CommonSegDS(data_root, config_file, crop_size)

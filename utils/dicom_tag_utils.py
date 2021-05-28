@@ -73,8 +73,8 @@ class DicomTagUtils:
 
 
 def test_DicomTagUtils():
-    # dicom_series = '/fileser/zhangwd/data/brain/gan/hospital_6_multi/CTA2DWI-多中心-20201102/阳性-闭塞\(188例）/六院-DWI闭塞病例\(105\)/1014186/CTA'
-    dicom_series = '/fileser/zhangwd/data/brain/gan/hospital_6_multi/CTA2DWI-多中心-20201102/阳性-闭塞(188例）/六院-DWI闭塞病例(105)/1014186/CTA'
+    # dicom_series = '/data/medical/brain/gan/hospital_6_multi/CTA2DWI-多中心-20201102/阳性-闭塞\(188例）/六院-DWI闭塞病例\(105\)/1014186/CTA'
+    dicom_series = '/data/medical/brain/gan/hospital_6_multi/CTA2DWI-多中心-20201102/阳性-闭塞(188例）/六院-DWI闭塞病例(105)/1014186/CTA'
 
     metadata = DicomTagUtils.load_metadata(dicom_series, is_series=True)
     DicomTagUtils.get_basic_info(metadata)

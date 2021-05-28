@@ -388,7 +388,7 @@ class DatasetsUtils:
     @staticmethod
     def split_ds(image_root, out_config_dir, train_ratio=0.7, val_ratio=0.2):
         '''
-        debug cmd: split_ds('/fileser/zhangwd/data/lung/changzheng/airway/airway_20201030/images', '/fileser/zhangwd/data/lung/changzheng/airway/airway_20201030/config')
+        debug cmd: split_ds('/data/medical/lung/changzheng/airway/airway_20201030/images', '/data/medical/lung/changzheng/airway/airway_20201030/config')
 
         out_config_dir listed as follows:
             tree -L 1
@@ -567,14 +567,14 @@ def test_resample_image_mask_unsame_resolution_multiprocess():
     我就是个分割线，下面的是心脏腔室的处理
     '''
 
-    image_root = '/fileser/zhangwd/data/cardiac/chamber/seg/chamber_seg/images'
-    mask_root = '/fileser/zhangwd/data/cardiac/chamber/seg/chamber_seg/masks'
+    image_root = '/data/medical/cardiac/chamber/seg/chamber_seg/images'
+    mask_root = '/data/medical/cardiac/chamber/seg/chamber_seg/masks'
 
-    # dst_image_root = '/fileser/zhangwd/data/cardiac/chamber/seg/chamber_seg_resampled_unified/images'
-    # dst_mask_root = '/fileser/zhangwd/data/cardiac/chamber/seg/chamber_seg_resampled_unified/masks'
+    # dst_image_root = '/data/medical/cardiac/chamber/seg/chamber_seg_resampled_unified/images'
+    # dst_mask_root = '/data/medical/cardiac/chamber/seg/chamber_seg_resampled_unified/masks'
     # dst_size = [128, 128, 128]
-    dst_image_root = '/fileser/zhangwd/data/cardiac/chamber/seg/chamber_seg_resampled_unified_256/images'
-    dst_mask_root = '/fileser/zhangwd/data/cardiac/chamber/seg/chamber_seg_resampled_unified_256/masks'
+    dst_image_root = '/data/medical/cardiac/chamber/seg/chamber_seg_resampled_unified_256/images'
+    dst_mask_root = '/data/medical/cardiac/chamber/seg/chamber_seg_resampled_unified_256/masks'
     dst_size = [256, 256, 256]
 
     image_postfix = '.nii.gz'
@@ -594,11 +594,11 @@ def test_resample_image_mask_unsame_resolution_multiprocess():
     我就是个分割线，下面的是心包的处理
     '''
 
-    # image_root = '/fileser/zhangwd/data/cardiac/seg/heart_hub/images'
-    # mask_root = '/fileser/zhangwd/data/cardiac/seg/heart_hub/renamed_masks'
+    # image_root = '/data/medical/cardiac/seg/heart_hub/images'
+    # mask_root = '/data/medical/cardiac/seg/heart_hub/renamed_masks'
 
-    # dst_image_root = '/fileser/zhangwd/data/cardiac/seg/heart_hub/resampled_unified_128/images'
-    # dst_mask_root = '/fileser/zhangwd/data/cardiac/seg/heart_hub/resampled_unified_128/masks'
+    # dst_image_root = '/data/medical/cardiac/seg/heart_hub/resampled_unified_128/images'
+    # dst_mask_root = '/data/medical/cardiac/seg/heart_hub/resampled_unified_128/masks'
 
     # dst_size = [128, 128, 128]
 
@@ -619,9 +619,9 @@ def test_restore_ori_image_from_resampled_image():
     我就是个分割线，下面的是: 利用小分辨率的（等分辨率）模型将心脏进行分割，
     并将风格后的心脏mask恢复到原图一样的大小
     '''
-    mask_file = '/fileser/zhangwd/data/cardiac/chamber/seg/chamber_seg_resampled_unified/masks/1.3.12.2.1107.5.1.4.60320.30000015020300202700000017926.nii.gz'
-    ref_image_file = '/fileser/zhangwd/data/cardiac/chamber/seg/chamber_seg/images/1.3.12.2.1107.5.1.4.60320.30000015020300202700000017926.nii.gz'
-    ref_mask_file = '/fileser/zhangwd/data/cardiac/chamber/seg/chamber_seg/masks/1.3.12.2.1107.5.1.4.60320.30000015020300202700000017926.nii.gz'
+    mask_file = '/data/medical/cardiac/chamber/seg/chamber_seg_resampled_unified/masks/1.3.12.2.1107.5.1.4.60320.30000015020300202700000017926.nii.gz'
+    ref_image_file = '/data/medical/cardiac/chamber/seg/chamber_seg/images/1.3.12.2.1107.5.1.4.60320.30000015020300202700000017926.nii.gz'
+    ref_mask_file = '/data/medical/cardiac/chamber/seg/chamber_seg/masks/1.3.12.2.1107.5.1.4.60320.30000015020300202700000017926.nii.gz'
 
     resample_mask = sitk.ReadImage(mask_file)
     ori_ref_image = sitk.ReadImage(ref_image_file)
@@ -642,7 +642,7 @@ def test_restore_ori_image_from_resampled_image():
 
 def test_cut_image_into_blocks_by_sliding_window():
     beg = time.time()
-    infile = '/fileser/zhangwd/data/lung/changzheng/airway/airway_20201030/pred_masks/1.2.840.113704.1.111.10192.1571886399.11/coarse_lung/cropped_image.nii.gz'
+    infile = '/data/medical/lung/changzheng/airway/airway_20201030/pred_masks/1.2.840.113704.1.111.10192.1571886399.11/coarse_lung/cropped_image.nii.gz'
     image = sitk.ReadImage(infile)
     image_arr = sitk.GetArrayFromImage(image)
     crop_size = [128, 128, 128]
@@ -663,8 +663,8 @@ def test_cut_image_into_blocks_by_sliding_window():
     
 def test_extend_image_mask_boundary_for_seg():
     beg = time.time()
-    image_file = '/fileser/zhangwd/data/lung/changzheng/airway/airway_20201030/paires_croped_by_coarse_lung_seg/images/1.2.840.113704.1.111.10192.1571886399.11.nii.gz'
-    mask_file = '/fileser/zhangwd/data/lung/changzheng/airway/airway_20201030/paires_croped_by_coarse_lung_seg/masks/1.2.840.113704.1.111.10192.1571886399.11.nii.gz'
+    image_file = '/data/medical/lung/changzheng/airway/airway_20201030/paires_croped_by_coarse_lung_seg/images/1.2.840.113704.1.111.10192.1571886399.11.nii.gz'
+    mask_file = '/data/medical/lung/changzheng/airway/airway_20201030/paires_croped_by_coarse_lung_seg/masks/1.2.840.113704.1.111.10192.1571886399.11.nii.gz'
 
     out_dir = './tmp_out/test_extend_image_mask_boundary_for_seg'
     os.makedirs(out_dir, exist_ok=True)
@@ -704,8 +704,8 @@ def test_extend_image_mask_boundary_for_seg():
 
 def test_crop_image_mask_with_padding():
     beg = time.time()
-    image_file = '/fileser/zhangwd/data/lung/changzheng/airway/airway_20201030/paires_croped_by_coarse_lung_seg/images/1.2.840.113704.1.111.10192.1571886399.11.nii.gz'
-    mask_file = '/fileser/zhangwd/data/lung/changzheng/airway/airway_20201030/paires_croped_by_coarse_lung_seg/masks/1.2.840.113704.1.111.10192.1571886399.11.nii.gz'
+    image_file = '/data/medical/lung/changzheng/airway/airway_20201030/paires_croped_by_coarse_lung_seg/images/1.2.840.113704.1.111.10192.1571886399.11.nii.gz'
+    mask_file = '/data/medical/lung/changzheng/airway/airway_20201030/paires_croped_by_coarse_lung_seg/masks/1.2.840.113704.1.111.10192.1571886399.11.nii.gz'
 
     out_dir = './tmp_out/test_crop_image_mask_with_padding'
     os.makedirs(out_dir, exist_ok=True)
@@ -746,7 +746,7 @@ def test_crop_image_mask_with_padding():
 def test_pairs_split_3d_to_2d_slice_multiprocess():
     # 华东COPD
     indir = '/data/medical/lung/copd/copd_412/images/out_pairs'
-    outdir = '/fileser/zhangwd/data/hospital/huadong/copd/copd_gan/data_412/images/slice'
+    outdir = '/data/medical/hospital/huadong/copd/copd_gan/data_412/images/slice'
     src_pattern = 'image_raw.nii.gz'
     dst_pattern = 'substraction.nii.gz'
     

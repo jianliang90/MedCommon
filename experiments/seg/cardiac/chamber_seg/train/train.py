@@ -36,7 +36,7 @@ import fire
 
 
 
-seg_root = '/fileser/zhangwd/data/cardiac/chamber/seg/chamber_seg_resampled_unified_256'
+seg_root = '/data/medical/cardiac/chamber/seg/chamber_seg_resampled_unified_256'
 
 
 # class Options():

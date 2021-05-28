@@ -197,7 +197,7 @@ def test_get_maximal_connected_region_multilabel():
     # 心脏粗分割
 
     if test_mode == 'cardiac':
-        root_dir = '/fileser/zhangwd/data/cardiac/cta2mbf/20201216/3.sorted_mask'
+        root_dir = '/data/medical/cardiac/cta2mbf/20201216/3.sorted_mask'
         for pid in tqdm(os.listdir(root_dir)):
             pid_path = os.path.join(root_dir, pid)
             if not os.path.isdir(pid_path):
@@ -306,9 +306,9 @@ def test_add_region_by_mask():
     # case 1:
     # beg = time.time()
 
-    # root = '/fileser/zhangwd/data/hospital/huadong/copd/copd_gan/data_412/images/inference_result/1.2.156.112605.14038007945377.191013234240.3.5228.39324'
-    # mask_root = '/fileser/zhangwd/data/hospital/huadong/copd/copd_gan/data_412/images/registried_exp/1.2.156.112605.14038007945377.191013234240.3.5228.39324'
-    # out_root = '/fileser/zhangwd/data/hospital/huadong/copd/copd_gan/data_412/images/inference_result3/1.2.156.112605.14038007945377.191013234240.3.5228.39324'
+    # root = '/data/medical/hospital/huadong/copd/copd_gan/data_412/images/inference_result/1.2.156.112605.14038007945377.191013234240.3.5228.39324'
+    # mask_root = '/data/medical/hospital/huadong/copd/copd_gan/data_412/images/registried_exp/1.2.156.112605.14038007945377.191013234240.3.5228.39324'
+    # out_root = '/data/medical/hospital/huadong/copd/copd_gan/data_412/images/inference_result3/1.2.156.112605.14038007945377.191013234240.3.5228.39324'
 
 
     # bg_img_file = os.path.join(root, 'real_A.nii.gz')

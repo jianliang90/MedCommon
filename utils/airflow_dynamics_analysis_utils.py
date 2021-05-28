@@ -113,11 +113,11 @@ class AirflowDynamicsAnalysisUtils:
 
 
 def test_generate_mask_from_analysis_csv():
-    # in_csv_file = '/fileser/zhangwd/data/lung/changzheng/airway/airflow_dynamics_analysis/exp_20201202/COPD气流动力学分析分析_gongfengying_test/FEV1_1.5.csv'
-    dcm_file = '/fileser/zhangwd/data/lung/changzheng/airway/airway_20201030/images/1.2.840.113704.1.111.2452.1387439529.10'
-    in_csv_root = '/fileser/zhangwd/data/lung/changzheng/airway/airflow_dynamics_analysis/exp_20201202/COPD气流动力学分析分析_gongfengying_test'
+    # in_csv_file = '/data/medical/lung/changzheng/airway/airflow_dynamics_analysis/exp_20201202/COPD气流动力学分析分析_gongfengying_test/FEV1_1.5.csv'
+    dcm_file = '/data/medical/lung/changzheng/airway/airway_20201030/images/1.2.840.113704.1.111.2452.1387439529.10'
+    in_csv_root = '/data/medical/lung/changzheng/airway/airflow_dynamics_analysis/exp_20201202/COPD气流动力学分析分析_gongfengying_test'
     in_csv_files = glob(os.path.join(in_csv_root, '*FEV1*.csv'))
-    out_dir = '/fileser/zhangwd/data/lung/changzheng/airway/airflow_dynamics_analysis/exp_20201202/preprocessed_data'
+    out_dir = '/data/medical/lung/changzheng/airway/airflow_dynamics_analysis/exp_20201202/preprocessed_data'
     
     for in_csv_file in tqdm(in_csv_files):
         AirflowDynamicsAnalysisUtils.generate_mask_from_analysis_csv(in_csv_file, dcm_file, out_dir)

@@ -146,8 +146,8 @@ def train():
         print('validation mode')
         model.validate(val_dataLoader)
     elif args.mode == 'inference':
-        # inference_onecase(network, args, '/fileser/zhangwd/data/lung/LUNA/RAW_NII/1.3.6.1.4.1.14519.5.2.1.6279.6001.245546033414728092794968890929.nii.gz', '/fileser/zhangwd/data/lung/changzheng/airway/airway_20201030/coarse_lung_masks/test.nii.gz')
-        inference_onecase(network, args, '/fileser/zhangfan/DataSet/airway_segment_data/train_lung_airway_data/image_refine/ori_128_128_128/1.3.6.1.4.1.14519.5.2.1.6279.6001.148935306123327835217659769212.nii.gz', '/fileser/zhangwd/data/lung/changzheng/airway/airway_20201030/coarse_lung_masks/test.nii.gz')
+        # inference_onecase(network, args, '/data/medical/lung/LUNA/RAW_NII/1.3.6.1.4.1.14519.5.2.1.6279.6001.245546033414728092794968890929.nii.gz', '/data/medical/lung/changzheng/airway/airway_20201030/coarse_lung_masks/test.nii.gz')
+        inference_onecase(network, args, '/fileser/zhangfan/DataSet/airway_segment_data/train_lung_airway_data/image_refine/ori_128_128_128/1.3.6.1.4.1.14519.5.2.1.6279.6001.148935306123327835217659769212.nii.gz', '/data/medical/lung/changzheng/airway/airway_20201030/coarse_lung_masks/test.nii.gz')
 
 
 if __name__ == "__main__":

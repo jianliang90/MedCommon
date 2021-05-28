@@ -89,8 +89,8 @@ def download_dcms_with_website_multiprocess(download_pth, config_file, process_n
     print('hello world!')
 
 def test_download_dcms_with_website_multiprocess():
-    download_pth = '/fileser/zhangwd/data/hospital/huadong/copd/copd_gan/data_457/images/inhale'
-    config_file = '/fileser/zhangwd/data/hospital/huadong/copd/copd_gan/data_457/annotation/文件内网地址信息-导出结果_inhale.csv'
+    download_pth = '/data/medical/hospital/huadong/copd/copd_gan/data_457/images/inhale'
+    config_file = '/data/medical/hospital/huadong/copd/copd_gan/data_457/annotation/文件内网地址信息-导出结果_inhale.csv'
     download_dcms_with_website_multiprocess(download_pth, config_file)
 
 
@@ -365,13 +365,13 @@ class DownloadUtils:
             DownloadUtils.rename_mask_files(indir, outdir, anno_file)               
 
 def test_download_dcms_with_website_multiprocess():
-    download_pth = '/fileser/zhangwd/data/hospital/huadong/copd/copd_gan/data_457/images/inhale'
-    config_file = '/fileser/zhangwd/data/hospital/huadong/copd/copd_gan/data_457/annotation/文件内网地址信息-导出结果_inhale.csv'
+    download_pth = '/data/medical/hospital/huadong/copd/copd_gan/data_457/images/inhale'
+    config_file = '/data/medical/hospital/huadong/copd/copd_gan/data_457/annotation/文件内网地址信息-导出结果_inhale.csv'
     DownloadUtils.download_dcms_with_website_multiprocess(download_pth, config_file)
 
 def test_download_masks_batch():
-    anno_root = '/fileser/zhangwd/data/brain/Cerebrovascular/segmenation/annotation/anno_table'
-    out_path = '/fileser/zhangwd/data/brain/Cerebrovascular/segmenation/masks'
+    anno_root = '/data/medical/brain/Cerebrovascular/segmenation/annotation/anno_table'
+    out_path = '/data/medical/brain/Cerebrovascular/segmenation/masks'
     DownloadUtils.download_masks_batch(anno_root, out_path)
 
 

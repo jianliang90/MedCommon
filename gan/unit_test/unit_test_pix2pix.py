@@ -31,7 +31,7 @@ if 'rank' not in opt:
 print(opt)
 
 
-data_root = '/fileser/zhangwd/data/cardiac/cta2mbf/data_114_20210318/5.mbf_myocardium'
+data_root = '/data/medical/cardiac/cta2mbf/data_114_20210318/5.mbf_myocardium'
 transform = get_common_transform([352,352,160],'GAN')
 ds = GAN_COMMON_DS(data_root, 'cropped_cta.nii.gz', 'cropped_mbf.nii.gz', [64,64,64], transform)
 dataloader = DataLoader(ds, batch_size=1, num_workers=2, shuffle=True, pin_memory=True)

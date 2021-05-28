@@ -7,7 +7,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), os.path.pardir, os.path.
 from utils.datasets_utils import DatasetsUtils
 from segmentation.datasets.common_seg_datasets import CommonSegDS
 
-pericardium_seg_root = '/fileser/zhangwd/data/cardiac/seg/pericardium'
+pericardium_seg_root = '/data/medical/cardiac/seg/pericardium'
 pericardium_seg_root_images = os.path.join(pericardium_seg_root, 'images')
 pericardium_seg_root_masks = os.path.join(pericardium_seg_root, 'masks')
 pericardium_seg_root_renamed_masks = os.path.join(pericardium_seg_root, 'renamed_masks')

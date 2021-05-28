@@ -82,9 +82,9 @@ def train_one_epoch(dataloader, model, criterion, optimizer, epoch, display, pha
 
 def inference(img_path, model_pth, out_dir, is_dcm=True):
     '''
-    debug cmd: inference('/fileser/zhangwd/data/lung/changzheng/airway/airway_20201030/images/1.2.840.113704.1.111.10192.1571886399.11', './airway_coarse_seg_train_0.020_val_0.052', './output/seg/inference')
-    invoke cmd: python train.py inference '/fileser/zhangwd/data/lung/changzheng/airway/airway_20201030/images/1.2.840.113704.1.111.10192.1571886399.11' './airway_coarse_seg_train_0.020_val_0.052' './output/seg/inference' True
-    invoke cmd: python train.py inference '/fileser/zhangwd/data/lung/LUNA/RAW_NII/1.3.6.1.4.1.14519.5.2.1.6279.6001.106164978370116976238911317774.nii.gz' './airway_coarse_seg_train_0.020_val_0.052' './output/seg/inference' False
+    debug cmd: inference('/data/medical/lung/changzheng/airway/airway_20201030/images/1.2.840.113704.1.111.10192.1571886399.11', './airway_coarse_seg_train_0.020_val_0.052', './output/seg/inference')
+    invoke cmd: python train.py inference '/data/medical/lung/changzheng/airway/airway_20201030/images/1.2.840.113704.1.111.10192.1571886399.11' './airway_coarse_seg_train_0.020_val_0.052' './output/seg/inference' True
+    invoke cmd: python train.py inference '/data/medical/lung/LUNA/RAW_NII/1.3.6.1.4.1.14519.5.2.1.6279.6001.106164978370116976238911317774.nii.gz' './airway_coarse_seg_train_0.020_val_0.052' './output/seg/inference' False
     '''
     print(img_path)
     if is_dcm:
@@ -164,5 +164,5 @@ if __name__ == '__main__':
     # main()
     # inference('../data/seg/nii_file/1.3.12.2.1107.5.1.4.60320.30000015012900333934300003426/img.nii.gz', '../data/seg/model/cardiac_seg_train_0.013_val_0.020', '../data/seg/inference/test')
     # inference('../../data/changzheng/airway/airway_20201030/paires_croped_by_coarse_lung_seg/images/1.2.840.113704.1.111.10192.1571886399.11.nii.gz', '../data/seg/model/cardiac_seg_train_0.105_val_0.095', '../data/seg/inference/test')
-    # inference('/fileser/zhangwd/data/lung/changzheng/airway/airway_20201030/images/1.2.840.113704.1.111.10192.1571886399.11', './airway_coarse_seg_train_0.020_val_0.052', './output/seg/inference')
-    inference('/fileser/zhangwd/data/lung/changzheng/airway/airway_20201030/images/1.3.46.670589.33.1.63725405821017542900002.4919856832254375598', './airway_coarse_seg_train_0.020_val_0.052', './output/seg/inference')
+    # inference('/data/medical/lung/changzheng/airway/airway_20201030/images/1.2.840.113704.1.111.10192.1571886399.11', './airway_coarse_seg_train_0.020_val_0.052', './output/seg/inference')
+    inference('/data/medical/lung/changzheng/airway/airway_20201030/images/1.3.46.670589.33.1.63725405821017542900002.4919856832254375598', './airway_coarse_seg_train_0.020_val_0.052', './output/seg/inference')

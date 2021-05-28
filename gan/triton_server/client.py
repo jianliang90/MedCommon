@@ -22,7 +22,7 @@ triton_client = httpclient.InferenceServerClient(url=url, verbose=verbose)
 img = np.random.rand(1,1,448,448,128)
 img = np.array(img, dtype=np.float32)
 
-infile = '/fileser/zhangwd/data/cardiac/cta2mbf/data_114_20210318/5.mbf_myocardium/1069558/cropped_cta.nii.gz'
+infile = '/data/medical/cardiac/cta2mbf/data_114_20210318/5.mbf_myocardium/1069558/cropped_cta.nii.gz'
 # img = sitk.ReadImage(infile)
 image_shape = [320,320,160]
 transforms = get_common_transform(image_shape, 'GAN_INFERENCE')

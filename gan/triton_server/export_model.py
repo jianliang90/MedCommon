@@ -13,7 +13,7 @@ import numpy as np
 
 
 # load example sample
-infile = '/fileser/zhangwd/data/cardiac/cta2mbf/data_114_20210318/5.mbf_myocardium/1069558/cropped_cta.nii.gz'
+infile = '/data/medical/cardiac/cta2mbf/data_114_20210318/5.mbf_myocardium/1069558/cropped_cta.nii.gz'
 image_shape = [320,320,160]
 transforms = get_common_transform(image_shape, 'GAN_INFERENCE')
 img = GANDataWrapper.get_processed_image(transforms,infile)
@@ -23,7 +23,7 @@ input_tensor = torch.from_numpy(img)
 print(input_tensor.shape)
 
 
-# data_root = '/fileser/zhangwd/data/cardiac/cta2mbf/data_114_20210318/5.mbf_myocardium'
+# data_root = '/data/medical/cardiac/cta2mbf/data_114_20210318/5.mbf_myocardium'
 # transform = get_common_transform([320,320,160],'GAN')
 # ds = GAN_COMMON_DS(data_root, 'cropped_cta.nii.gz', 'cropped_mbf.nii.gz', [64,64,64], transform)
 # dataloader = DataLoader(ds, batch_size=1, num_workers=2, shuffle=True, pin_memory=True)

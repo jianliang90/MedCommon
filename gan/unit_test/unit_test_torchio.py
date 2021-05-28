@@ -9,7 +9,7 @@ from torch.utils.data import Dataset, DataLoader
 
 from tqdm import tqdm
 
-data_root = '/fileser/zhangwd/data/cardiac/cta2mbf/data_114_20210318/5.mbf_myocardium'
+data_root = '/data/medical/cardiac/cta2mbf/data_114_20210318/5.mbf_myocardium'
 
 transform = get_common_transform([128,128,160],'GAN')
 ds = GAN_COMMON_DS(data_root, 'cropped_cta.nii.gz', 'cropped_mbf.nii.gz', [64,64,64], transform)

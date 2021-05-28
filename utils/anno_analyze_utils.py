@@ -36,7 +36,7 @@ class DetectionAnnotationAnalyzeUtils:
 
 def test_DetectionAnnotationAnalyzeUtils():
     import pandas as pd
-    anno_file = '/fileser/zhangwd/data/hospital/cz/ggo/annotation/标注结果-长征非测试集(阳性）/01回流数据信息表（UID)-DD1209V6- 阳（阴）性含测试集数据数量表格.xlsx'
+    anno_file = '/data/medical/hospital/cz/ggo/annotation/标注结果-长征非测试集(阳性）/01回流数据信息表（UID)-DD1209V6- 阳（阴）性含测试集数据数量表格.xlsx'
     df = pd.read_excel(anno_file, sheet_name=1)
 
     center_col_name = ['coordX', 'coordY', 'coordZ']
