@@ -6,7 +6,7 @@
 
 ### 脑部图像分割
 
-#### [脑血管分割](./experiments/seg/brain/cerebrovascular/readme.md)
+#### [脑血管分割](experiments/seg/brain/cerebrovascular/readme.md)
 
 #### [脑实质分割](./experiments/seg/brain/parenchyma/readme.md)
 
