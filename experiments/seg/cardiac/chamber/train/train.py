@@ -19,10 +19,10 @@ if __name__ == '__main__':
     inference(
         os.path.join('/data/medical/cardiac/chamber/seg/chamber_seg/images/1.3.12.2.1107.5.1.4.60320.30000015020202382801500025712.nii.gz'), 
         os.path.join('/data/medical/cardiac/chamber/seg/chamber_256/inference/exp1'), [256, 256, 256], 
-        os.path.join('/data/medical/cardiac/chamber/seg/chamber_256/checkpoints/chamber/common_seg_epoch_9_train_0.082')
+        os.path.join('/data/medical/cardiac/chamber/seg/chamber_256/checkpoints/chamber/common_seg_epoch_19_train_0.067')
     )
     inference(
         os.path.join('/data/medical/cardiac/chamber/seg/chamber_seg/images/1.3.12.2.1107.5.1.4.60320.30000018042800095349200029782.nii.gz'), 
         os.path.join('/data/medical/cardiac/chamber/seg/chamber_256/inference/exp1'), [256, 256, 256], 
-        os.path.join('/data/medical/cardiac/chamber/seg/chamber_256/checkpoints/chamber/common_seg_epoch_9_train_0.082')
+        os.path.join('/data/medical/cardiac/chamber/seg/chamber_256/checkpoints/chamber/common_seg_epoch_19_train_0.067')
     )
