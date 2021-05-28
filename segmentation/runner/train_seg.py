@@ -132,12 +132,23 @@ class SegmentationTrainer:
     def load_model(opts):
         num_classes = opts.num_classes
         base_n_filter = opts.base_n_filter
-        model = ResampledUnet3D(1, num_classes, base_n_filter)
+        dynamic_size = opts.dynamic_size
+        if dynamic_size:
+            net_args={
+                "input_size": dynamic_size, 
+                "dynamic_resize": True
+            }
+        else:
+            net_args={
+                "input_size": dynamic_size, 
+                "dynamic_resize": False
+            }            
+        model = ResampledUnet3D(1, num_classes, base_n_filter, net_args)
         model.load_state_dict(torch.load(opts.weights, map_location='cpu'))
         return model
 
     @staticmethod
-    def inference_one_case(model, series_path, is_dcm=True, dst_size = [128, 128, 128]):
+    def inference_one_case(model, series_path, is_dcm=True, dst_size = [128, 128, 128], dynamic_size=None):
         # 注意在处理分割模型时，模型的模式model.eval()，和模型训练时一致
         model.eval()
 
@@ -165,9 +176,15 @@ class SegmentationTrainer:
         return image, ori_pred_sitk_mask
 
     @staticmethod
-    def inference_one_case1(model, series_path, crop_size = [128, 128, 128], out_root=None):
-        subject = CommonSegmentationDS.get_inference_input(series_path, crop_size)
-        input = subject['src']['data'].float().unsqueeze(0)
+    def inference_one_case1(model, series_path, crop_size = [128, 128, 128], out_root=None, opts=None):
+        if opts.dynamic_size:
+            img = sitk.ReadImage(series_path)
+            input = sitk.GetArrayFromImage(img)
+            input = np.transpose(input, [2,1,0])
+            input = torch.from_numpy(input).unsqueeze(0).unsqueeze(0).float()
+        else:
+            subject = CommonSegmentationDS.get_inference_input(series_path, crop_size)
+            input = subject['src']['data'].float().unsqueeze(0)
         model.eval()
         output = model(input)
         pred_mask = torch.nn.functional.sigmoid(output).argmax(1)    
@@ -273,7 +290,7 @@ def inference(infile, out_root, cropped_size = [288, 288, 320], weights=None):
     if weights:
         opts.weights = weights
     model = SegmentationTrainer.load_model(opts)
-    SegmentationTrainer.inference_one_case1(model, infile, cropped_size, out_root)
+    SegmentationTrainer.inference_one_case1(model, infile, cropped_size, out_root, opts)
 
 def test_inference():
     opts = TrainOptions().parse()

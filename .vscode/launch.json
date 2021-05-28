@@ -105,6 +105,29 @@
         },
 
         {
+            "name": "common: cerebral parenchyma segmentation",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "cwd": "${fileDirname}",
+            "env": {
+                "CUDA_VISIBLE_DEVICES": "7"
+            },
+            "args": [
+                "--dataroot", "/data/medical/brain/cerebral_parenchyma/exp/ct_256", 
+                "--num_classes", "2", 
+                "--base_n_filter", "6", 
+                "--lr", "1e-3",
+                "--n_epochs", "200", 
+                "--crop_size", "32", "32", "32",
+                "--dynamic_size", "256", "256", "256", 
+                "--weights", "/data/medical/cardiac/seg/coronary/coronary_cropped_by_mask/checkpoints/coronary/common_seg_epoch_28_train_0.069", 
+                "--name", "coronary"
+            ]
+        },
+
+        {
             "name": "common: chamber seg",
             "type": "python",
             "request": "launch",

@@ -55,6 +55,7 @@ class BaseOptions():
         parser.add_argument('--num_classes', type=int, default=2, help='label nums')
         parser.add_argument('--base_n_filter', type=int, default=8, help='first layer filter output channel number')
         parser.add_argument('--weights', type=str, default=None, help='pretrained weights file')
+        parser.add_argument('--dynamic_size', nargs='+', type=int, default=None)
         self.initialized = True
         return parser
 

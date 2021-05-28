@@ -313,7 +313,8 @@ class DatasetsUtils:
         
         resampled_image = DatasetsUtils.resample_image_unsame_resolution(image_data['sitk_image'], dst_size)
         resampled_mask = DatasetsUtils.resample_image_unsame_resolution(mask_data['sitk_image'], dst_size)
-
+        # 注：标注数据的时候未知原因二者的信息会有稍许差别，有可能是精度的问题，待查证
+        resampled_mask.CopyInformation(resampled_image)
         os.makedirs(os.path.dirname(dst_image_file), exist_ok=True)
         os.makedirs(os.path.dirname(dst_mask_file), exist_ok=True)
         sitk.WriteImage(resampled_image, dst_image_file)

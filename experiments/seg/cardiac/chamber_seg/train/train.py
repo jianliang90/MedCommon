@@ -177,5 +177,5 @@ def inference():
 
 if __name__ == '__main__':
     # DatasetsUtils.split_ds(os.path.join(seg_root, 'images'), os.path.join(seg_root, 'config'))
-    main()
-    # inference()
+    # main()
+    inference()

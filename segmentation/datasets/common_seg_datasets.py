@@ -140,6 +140,19 @@ class CommonSegDS(Dataset):
 
         return image_tensor, mask_tensor, image_file, mask_file
 
+def generate_resampled_pairs_unsame_resolution(data_root, out_root, dst_size):
+    image_root = os.path.join(data_root, 'images')
+    mask_root = os.path.join(data_root, 'masks')
+    out_image_root = os.path.join(out_root, 'images')
+    out_mask_root = os.path.join(out_root, 'masks')
+    image_postfix='.nii.gz'
+    mask_postfix='.nii.gz'
+
+    DatasetsUtils.resample_image_mask_unsame_resolution_multiprocess(
+        image_root, mask_root, 
+        out_image_root, out_mask_root, dst_size, 
+        image_postfix, mask_postfix
+    )
 
 def test_CommonSeg_DS():
     from tqdm import tqdm

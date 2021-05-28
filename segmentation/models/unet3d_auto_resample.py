@@ -45,13 +45,17 @@ class Output(nn.Module):
 class ResampledUnet3D(nn.Module):
     def __init__(self, in_channels, n_classes, base_n_filter=8, 
         net_args={
-            "input_size": [128, 128, 128]
+            "input_size": [128, 128, 128], 
+            "dynamic_resize": False
         }):
         super(ResampledUnet3D, self).__init__()
         
         self.unet_3d = UNet3D(in_channels, n_classes, base_n_filter)
-
-        self.input = Input(input_size=net_args["input_size"])
+        
+        if 'dynamic_resize' in net_args and net_args['dynamic_resize']:
+            self.input = Input(input_size=net_args["input_size"])
+        else:
+            self.input = None
         self.output = Output()
 
         self.initialize_weights()
@@ -64,10 +68,13 @@ class ResampledUnet3D(nn.Module):
                     m.bias.data.zero_()
 
     def forward(self, x_input):
-        # x = self.input(x_input)
-        x = x_input
+        if self.input:
+            x = self.input(x_input)
+        else:
+            x = x_input
         output = self.unet_3d(x)
-        # output = self.output(output, x_input)
+        if self.input:
+            output = self.output(output, x_input)
 
         return output
 
