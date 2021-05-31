@@ -114,6 +114,22 @@ class MaskBoundingUtils:
             sitk.WriteImage(out_sitk_mask, out_mask_file)
 
 
+    @staticmethod
+    def fix_mask_sitk_info(root='/data/medical/lung/airway/segmentation'):
+        image_root = os.path.join(root, 'images')
+        mask_root = os.path.join(root, 'masks')
+        out_mask_root = os.path.join(root, 'masks_x')
+        os.makedirs(out_mask_root, exist_ok=True)
+        for f in tqdm(os.listdir(mask_root)):
+            basename = f.replace('.nii.gz', '')
+            image_file = os.path.join(image_root, '{}.nii.gz'.format(basename))
+            mask_file = os.path.join(mask_root, '{}.nii.gz'.format(basename))
+            out_mask_file = os.path.join(out_mask_root, '{}.nii.gz'.format(basename))
+            image = sitk.ReadImage(image_file)
+            mask = sitk.ReadImage(mask_file)
+            mask.CopyInformation(image)
+            sitk.WriteImage(mask, out_mask_file)
+
 
 
 if __name__ == '__main__':
