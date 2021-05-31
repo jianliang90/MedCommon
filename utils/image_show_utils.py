@@ -15,7 +15,7 @@ class ImageShowUtils:
         out_arr = (out_arr-min_v)/ww
         if lut:
             out_arr = lut(out_arr)*255
-            cv2.imwrite(out_file, cv2.cvtColor(out_arr, cv2.COLOR_RGB2BGR))
+            cv2.imwrite(out_file, cv2.cvtColor(np.array(out_arr, dtype=np.uint8), cv2.COLOR_RGB2BGR))
         else:
             out_arr = out_arr*255
             cv2.imwrite(out_file, out_arr)

@@ -6,6 +6,8 @@ import matplotlib.pyplot as plt
 import os
 import sys
 
+from tqdm import tqdm
+
 import SimpleITK as sitk
 root = os.path.abspath(os.path.join(os.path.dirname(__file__), os.path.pardir, os.path.pardir))
 print(root)
@@ -57,6 +59,15 @@ def export_slicemap_onecase(data_root, out_root):
     ImageShowUtils.save_volume_to_jpg(real_b_arr, os.path.join(out_root, 'real_b'), ww, wl, axis=0, file_prefix='x', reverse=False, lut_name='jet')
     ImageShowUtils.save_volume_to_jpg(fake_b_arr, os.path.join(out_root, 'fake_b'), ww, wl, axis=0, file_prefix='x', reverse=False, lut_name='jet')
     print('hello world!')
+
+def export_slicemap(
+        data_root='/data/medical/cardiac/cta2mbf/data_66_20210517/6.inference', 
+        out_root = '/data/medical/cardiac/cta2mbf/data_66_20210517/6.inference_slicemap'
+    ):
+    for suid in os.listdir(data_root):
+        sub_data_root = os.path.join(data_root, suid)
+        sub_out_root = os.path.join(out_root, suid)
+        export_slicemap_onecase(sub_data_root, sub_out_root)
     
 
 if __name__ == '__main__':
