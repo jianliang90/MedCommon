@@ -15,9 +15,10 @@ class ImageShowUtils:
         out_arr = (out_arr-min_v)/ww
         if lut:
             out_arr = lut(out_arr)*255
+            cv2.imwrite(out_file, cv2.cvtColor(out_arr, cv2.COLOR_RGB2BGR))
         else:
             out_arr = out_arr*255
-        cv2.imwrite(out_file, out_arr)
+            cv2.imwrite(out_file, out_arr)
 
     def save_volume_to_jpg(in_arr, out_root, ww, wl, axis=0, file_prefix=None, reverse=False, lut_name=None):
         '''
