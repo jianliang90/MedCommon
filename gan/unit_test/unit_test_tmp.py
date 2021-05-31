@@ -53,9 +53,9 @@ def export_slicemap_onecase(data_root, out_root):
     real_b_arr = sitk.GetArrayFromImage(real_b_img)
     fake_b_arr = sitk.GetArrayFromImage(fake_b_img)
 
-    ImageShowUtils.save_volume_to_jpg(real_a_arr, os.path.join(out_root, 'real_a'), ww, wl, axis=0, file_prefix='x', reverse=False, lut='jet')
-    ImageShowUtils.save_volume_to_jpg(real_b_arr, os.path.join(out_root, 'real_b'), ww, wl, axis=0, file_prefix='x', reverse=False, lut='jet')
-    ImageShowUtils.save_volume_to_jpg(fake_b_arr, os.path.join(out_root, 'fake_b'), ww, wl, axis=0, file_prefix='x', reverse=False, lut='jet')
+    ImageShowUtils.save_volume_to_jpg(real_a_arr, os.path.join(out_root, 'real_a'), ww, wl, axis=0, file_prefix='x', reverse=False, lut_name='jet')
+    ImageShowUtils.save_volume_to_jpg(real_b_arr, os.path.join(out_root, 'real_b'), ww, wl, axis=0, file_prefix='x', reverse=False, lut_name='jet')
+    ImageShowUtils.save_volume_to_jpg(fake_b_arr, os.path.join(out_root, 'fake_b'), ww, wl, axis=0, file_prefix='x', reverse=False, lut_name='jet')
     print('hello world!')
     
 

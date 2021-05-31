@@ -14,7 +14,7 @@ class ImageShowUtils:
         out_arr = np.clip(in_arr, min_v, max_v)
         out_arr = (out_arr-min_v)/ww
         if lut:
-            out_arr = lut(out_arr)
+            out_arr = lut(out_arr)*255
         else:
             out_arr = out_arr*255
         cv2.imwrite(out_file, out_arr)
@@ -47,7 +47,7 @@ class ImageShowUtils:
                 tmp_arr = in_arr[:,:,i]
             if reverse:
                 tmp_arr = tmp_arr[::-1,:]
-            ImageShowUtils.save_img(tmp_arr, sub_file_name, ww, wl, lut=None)
+            ImageShowUtils.save_img(tmp_arr, sub_file_name, ww, wl, lut)
 
 
 
