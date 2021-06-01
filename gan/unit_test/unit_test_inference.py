@@ -7,6 +7,9 @@ import numpy as np
 import torch
 from torch.utils.data import DataLoader
 
+from tqdm import tqdm
+import pandas as pd
+
 sys.path.append(os.path.join(os.path.dirname(__file__), os.path.pardir))
 
 from options.test_options import TestOptions
@@ -27,6 +30,7 @@ root = os.path.abspath(os.path.join(os.path.dirname(__file__), os.path.pardir, o
 # print(root)
 sys.path.append(root)
 from utils.image_show_utils import ImageShowUtils
+from utils.metrics_utils import MetricsUtils
 
 def inference():
     opt = TestOptions().parse()
@@ -111,5 +115,23 @@ def export_slicemap(
         sub_out_root = os.path.join(out_root, suid)
         export_slicemap_onecase(sub_data_root, sub_out_root)
 
+def calc_mae(
+        data_root='/data/medical/cardiac/cta2mbf/data_66_20210517/6.inference', 
+        out_dir = '/data/medical/cardiac/cta2mbf/data_66_20210517/7.analysis_result'
+    ):
+    row_elems = []
+    for suid in tqdm(os.list(data_root)):
+        sub_data_root = os.path.join(data_root, suid)
+        real_b_file = os.path.join(data_root, 'real_b.nii.gz')
+        fake_b_file = os.path.join(data_root, 'fake_b.nii.gz') 
+        _, mae = MetricsUtils.calc_mae_with_file(real_b_file, fake_b_file)
+        row_elems.append(np.array([suid, mae]))
+    df = pd.DataFrame(np.array(row_elems), columns=['inhale_suid', 'mae'])
+    os.makedirs(out_dir, exist_ok=True)
+    out_file = os.path.join(out_dir, 'mae.csv')
+    df.to_csv(out_file)
+
+
 if __name__ == '__main__':
-    inference()
+    # inference()
+    calc_mae()

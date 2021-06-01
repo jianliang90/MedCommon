@@ -1,5 +1,5 @@
 # exp 1
-CUDA_VISIBLE_DEVICES=7 python train.py \
+CUDA_VISIBLE_DEVICES=6 python train.py \
 --dataroot /data/medical/lung/LUNA/lung_256 \
 --num_classes 4 \
 --base_n_filter 6 \

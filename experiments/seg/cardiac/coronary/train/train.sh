@@ -1,11 +1,11 @@
 # exp 1
-CUDA_VISIBLE_DEVICES=7 python train.py \
+CUDA_VISIBLE_DEVICES=6 python train.py \
 --dataroot /data/medical/cardiac/seg/coronary/coronary_cropped_by_mask \
 --num_classes 2 \
 --base_n_filter 6 \
 --aug seg_train \
 --lr 2e-4 \
---n_epochs 400 \
+--n_epochs 800 \
 --crop_size 384 384 256 \
 --checkpoints_dir /data/medical/cardiac/seg/coronary/coronary_cropped_by_mask/checkpoints \
 --name coronary \
