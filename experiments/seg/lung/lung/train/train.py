@@ -34,18 +34,25 @@ def split_ds():
 
 
 if __name__ == '__main__':
+    # 生成数据集
     # generate_ds()
     # split_ds()
-    # train()
+    '''
+    ------------------------就是个分界线------------------------
+    '''
+    train()
+    '''
+    ------------------------就是个分界线------------------------
+    '''
     # 训练数据集中的数据
-    inference(
-        os.path.join('/data/medical/lung/LUNA/lung_ori/images/1.3.6.1.4.1.14519.5.2.1.6279.6001.640729228179368154416184318668.nii.gz'), 
-        os.path.join('/data/medical/lung/LUNA/lung_256/inference/exp1'), [256, 256, 256], 
-        os.path.join('/data/medical/lung/LUNA/lung_256/checkpoints/lung/common_seg_epoch_9_train_0.040')
-    ) 
-    inference(
-        os.path.join('/data/medical/lung/LUNA/lung_ori/images/1.3.6.1.4.1.14519.5.2.1.6279.6001.608029415915051219877530734559.nii.gz'), 
-        os.path.join('/data/medical/lung/LUNA/lung_256/inference/exp1'), [256, 256, 256], 
-        os.path.join('/data/medical/lung/LUNA/lung_256/checkpoints/lung/common_seg_epoch_9_train_0.040')
-    ) 
+    # inference(
+    #     os.path.join('/data/medical/lung/LUNA/lung_ori/images/1.3.6.1.4.1.14519.5.2.1.6279.6001.640729228179368154416184318668.nii.gz'), 
+    #     os.path.join('/data/medical/lung/LUNA/lung_256/inference/exp1'), [256, 256, 256], 
+    #     os.path.join('/data/medical/lung/LUNA/lung_256/checkpoints/lung/common_seg_epoch_91_train_0.024')
+    # ) 
+    # inference(
+    #     os.path.join('/data/medical/lung/LUNA/lung_ori/images/1.3.6.1.4.1.14519.5.2.1.6279.6001.608029415915051219877530734559.nii.gz'), 
+    #     os.path.join('/data/medical/lung/LUNA/lung_256/inference/exp1'), [256, 256, 256], 
+    #     os.path.join('/data/medical/lung/LUNA/lung_256/checkpoints/lung/common_seg_epoch_91_train_0.024')
+    # ) 
 

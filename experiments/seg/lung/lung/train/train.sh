@@ -8,5 +8,6 @@ CUDA_VISIBLE_DEVICES=6 python train.py \
 --n_epochs 400 \
 --crop_size 256 256 256 \
 --dynamic_size 256 256 256 \
+--weights /data/medical/lung/LUNA/lung_256/checkpoints/lung/common_seg_epoch_91_train_0.024 \
 --checkpoints_dir /data/medical/lung/LUNA/lung_256/checkpoints \
 --name lung

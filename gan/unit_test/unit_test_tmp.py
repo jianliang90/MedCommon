@@ -74,6 +74,6 @@ if __name__ == '__main__':
     # export_slicemap_onecase(data_root, out_root)
     export_slicemap()
     export_slicemap(
-        data_root='/data/medical/cardiac/cta2mbf/data_66_20210517/6.inference_384x384x160_train)', 
+        data_root='/data/medical/cardiac/cta2mbf/data_66_20210517/6.inference_384x384x160_train', 
         out_root = '/data/medical/cardiac/cta2mbf/data_66_20210517/6.inference_slicemap/inference_384x384x160_train'
     )
