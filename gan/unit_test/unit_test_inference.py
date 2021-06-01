@@ -120,7 +120,7 @@ def calc_mae(
         out_dir = '/data/medical/cardiac/cta2mbf/data_66_20210517/7.analysis_result'
     ):
     row_elems = []
-    for suid in tqdm(os.list(data_root)):
+    for suid in tqdm(os.listdir(data_root)):
         sub_data_root = os.path.join(data_root, suid)
         real_b_file = os.path.join(data_root, 'real_b.nii.gz')
         fake_b_file = os.path.join(data_root, 'fake_b.nii.gz') 
