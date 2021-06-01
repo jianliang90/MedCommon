@@ -64,11 +64,12 @@ def export_slicemap(
         data_root='/data/medical/cardiac/cta2mbf/data_66_20210517/6.inference', 
         out_root = '/data/medical/cardiac/cta2mbf/data_66_20210517/6.inference_slicemap'
     ):
-    for suid in os.listdir(data_root):
+    for suid in tqdm(os.listdir(data_root)):
         sub_data_root = os.path.join(data_root, suid)
         sub_out_root = os.path.join(out_root, suid)
         export_slicemap_onecase(sub_data_root, sub_out_root)
     
 
 if __name__ == '__main__':
-    export_slicemap_onecase(data_root, out_root)
+    # export_slicemap_onecase(data_root, out_root)
+    export_slicemap()
