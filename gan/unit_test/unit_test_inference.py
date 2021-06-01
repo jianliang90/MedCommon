@@ -122,8 +122,8 @@ def calc_mae(
     row_elems = []
     for suid in tqdm(os.listdir(data_root)):
         sub_data_root = os.path.join(data_root, suid)
-        real_b_file = os.path.join(data_root, 'real_b.nii.gz')
-        fake_b_file = os.path.join(data_root, 'fake_b.nii.gz') 
+        real_b_file = os.path.join(sub_data_root, 'real_b.nii.gz')
+        fake_b_file = os.path.join(sub_data_root, 'fake_b.nii.gz') 
         _, mae = MetricsUtils.calc_mae_with_file(real_b_file, fake_b_file)
         row_elems.append(np.array([suid, mae]))
     df = pd.DataFrame(np.array(row_elems), columns=['inhale_suid', 'mae'])
