@@ -1,1 +1,1 @@
-CUDA_VISIBLE_DEVICES=4 python unit_test_pix2pix_inference.py --dataroot xxx --model pix2pix_3d --input_nc 1 --output_nc 1 --ngf 32 --netG resnet_6blocks --ndf 8 --no_dropout --netD pixel --norm batch
+CUDA_VISIBLE_DEVICES=7 python unit_test_pix2pix_inference.py --dataroot xxx --model pix2pix_3d --input_nc 1 --output_nc 1 --ngf 32 --netG resnet_6blocks --ndf 8 --no_dropout --netD pixel --norm batch

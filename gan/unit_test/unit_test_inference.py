@@ -37,7 +37,8 @@ def inference():
     print(opt)
 
     data_root = '/data/medical/cardiac/cta2mbf/data_66_20210517/5.mbf_myocardium'
-    transform = get_common_transform([416,416,160],'GAN_INFERENCE')
+    # transform = get_common_transform([416,416,160],'GAN_INFERENCE')
+    transform = get_common_transform([384,384,160],'GAN_INFERENCE')
     ds = GAN_COMMON_DS(data_root, 'cropped_cta.nii.gz', 'cropped_mbf.nii.gz', [64,64,64], transform)
     dataloader = DataLoader(ds, batch_size=1, num_workers=2, shuffle=True, pin_memory=True)
     dataset_size = len(dataloader) 
@@ -47,10 +48,10 @@ def inference():
 
     model.netG.eval()
 
-    out_dir = "/data/medical/cardiac/cta2mbf/data_66_20210517/6.inference"
+    out_dir = "/data/medical/cardiac/cta2mbf/data_66_20210517/6.inference_384x384x160"
     os.makedirs(out_dir, exist_ok=True)
 
-    for index, (subjects) in enumerate(dataloader):
+    for index, (subjects) in tqdm(enumerate(dataloader)):
         real_a = subjects['src']['data'].float()
         real_b = subjects['dst']['data'].float()
         input = {}
@@ -116,7 +117,7 @@ def export_slicemap(
         export_slicemap_onecase(sub_data_root, sub_out_root)
 
 def calc_mae(
-        data_root='/data/medical/cardiac/cta2mbf/data_66_20210517/6.inference', 
+        data_root='/data/medical/cardiac/cta2mbf/data_66_20210517/6.inference_384x384x160_eval', 
         out_dir = '/data/medical/cardiac/cta2mbf/data_66_20210517/7.analysis_result'
     ):
     row_elems = []
@@ -128,7 +129,7 @@ def calc_mae(
         row_elems.append(np.array([suid, mae]))
     df = pd.DataFrame(np.array(row_elems), columns=['inhale_suid', 'mae'])
     os.makedirs(out_dir, exist_ok=True)
-    out_file = os.path.join(out_dir, 'mae.csv')
+    out_file = os.path.join(out_dir, 'mae_384x384x160_eval.csv')
     df.to_csv(out_file)
 
 

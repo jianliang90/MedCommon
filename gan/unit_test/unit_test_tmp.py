@@ -41,8 +41,8 @@ def generate_lut3d():
     sitk.WriteImage(rgb_img, os.path.join(data_root, 'real_b_rgb.nii.gz'))
 
 def export_slicemap_onecase(data_root, out_root):
-    ww = 150
-    wl = 75
+    ww = 200
+    wl = 100
     real_a_file = os.path.join(data_root, 'real_a.nii.gz')
     real_b_file = os.path.join(data_root, 'real_b.nii.gz')
     fake_b_file = os.path.join(data_root, 'fake_b.nii.gz')
@@ -73,3 +73,7 @@ def export_slicemap(
 if __name__ == '__main__':
     # export_slicemap_onecase(data_root, out_root)
     export_slicemap()
+    export_slicemap(
+        data_root='/data/medical/cardiac/cta2mbf/data_66_20210517/6.inference_384x384x160_train)', 
+        out_root = '/data/medical/cardiac/cta2mbf/data_66_20210517/6.inference_slicemap/inference_384x384x160_train'
+    )
