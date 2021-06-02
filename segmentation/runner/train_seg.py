@@ -213,7 +213,7 @@ class SegmentationTrainer:
             sitk.WriteImage(cropped_image, out_image_file)
             sitk.WriteImage(cropped_mask, out_mask_file)
         
-        print('hello world!')
+        return cropped_image, cropped_mask 
 
 
 
