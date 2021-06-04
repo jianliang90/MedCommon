@@ -9,10 +9,8 @@ sys.path.append(os.path.join(gan_root, 'external_lib/torchio'))
 
 
 import torchio as tio
-
 from torch.utils.data import Dataset, DataLoader
-
-import torchio as tio
+from utils.data_aug_utils import DATA_AUGMENTATION_UTILS
 
 def get_common_transform(image_shape, type='GAN'):
     default_transform = None
@@ -118,6 +116,13 @@ class GAN_COMMON_DS(Dataset):
 
     def __getitem__(self, item):
         return self.subjects_dataset.__getitem__(item)
+
+    @staticmethod
+    def get_inference_input(infile, image_shape):
+        subject = tio.Subject(src=tio.ScalarImage(infile))
+        trans = DATA_AUGMENTATION_UTILS.get_common_transform(image_shape, 'GAN_INFERENCE')
+        s = trans(subject)
+        return s
 
 
 class GANDataWrapper:

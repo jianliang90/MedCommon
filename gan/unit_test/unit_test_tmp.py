@@ -69,11 +69,40 @@ def export_slicemap(
         sub_out_root = os.path.join(out_root, suid)
         export_slicemap_onecase(sub_data_root, sub_out_root)
     
+# generate brain data tmp
+def generate_brain_data():
+
+    global_ncct_error_list = ['250238', '317892', '462086', '456640', '475170', '372829', '462630', '417357', '458192', '429884', '456831', 
+    '5016897', '3466686', '3772244', '3839904', '4728962', 
+    '149120', '299553', '371220', '372829', '445315', '458192', '152937', '163778', '447230', '447614', '454263', '448828', '453305', '458299', 
+    '406601', '437235', '445315', '447614', '448828', '456640', '163778', '393774']
+
+    import shutil
+    data_root = '/data/medical/brain/gan/hospital_6_crop/experiment_registration2/8.2.out'
+    dst_root = '/data/medical/brain/gan/hospital_6_crop/experiment_registration2/8.common_gan'
+    os.makedirs(dst_root, exist_ok=True)
+    ct_root = os.path.join(data_root, 'NCCT')
+    bxxx_root = os.path.join(data_root, 'DWI_BXXX')
+    for name in tqdm(os.listdir(ct_root)):
+        pid = name.split('_')[0]
+        if pid in global_ncct_error_list:
+            continue
+        src_ct_file = os.path.join(ct_root, name)
+        src_bxxx_file = os.path.join(bxxx_root, name.replace('_first_BS_NCCT.nii.gz', '_first_FU_DWI_BXXX.nii.gz'))
+        dst_sub_root = os.path.join(dst_root, pid)
+        os.makedirs(dst_sub_root, exist_ok=True)
+        dst_ct_file = os.path.join(dst_sub_root, 'CTA.nii.gz')
+        dst_bxxx_file = os.path.join(dst_sub_root, 'BXXX.nii.gz')
+        shutil.copyfile(src_ct_file, dst_ct_file)
+        shutil.copyfile(src_bxxx_file, dst_bxxx_file)
+
+
 
 if __name__ == '__main__':
     # export_slicemap_onecase(data_root, out_root)
-    export_slicemap()
-    export_slicemap(
-        data_root='/data/medical/cardiac/cta2mbf/data_66_20210517/6.inference_384x384x160_train', 
-        out_root = '/data/medical/cardiac/cta2mbf/data_66_20210517/6.inference_slicemap/inference_384x384x160_train'
-    )
+    # export_slicemap()
+    # export_slicemap(
+    #     data_root='/data/medical/cardiac/cta2mbf/data_66_20210517/6.inference_384x384x160_train', 
+    #     out_root = '/data/medical/cardiac/cta2mbf/data_66_20210517/6.inference_slicemap/inference_384x384x160_train'
+    # )
+    generate_brain_data()

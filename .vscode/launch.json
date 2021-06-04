@@ -150,10 +150,10 @@
             "console": "integratedTerminal",
             "cwd": "${fileDirname}",
             "env": {
-                "CUDA_VISIBLE_DEVICES": "0"
+                "CUDA_VISIBLE_DEVICES": "1"
             },
             "args": [
-                "--dataroot", "xxx",
+                "--dataroot", "/data/medical/cardiac/cta2mbf/data_114_20210318/5.mbf_myocardium",
                 "--model", "pix2pix_3d", 
                 "--input_nc", "1", 
                 "--output_nc", "1", 
@@ -182,7 +182,7 @@
                 "CUDA_VISIBLE_DEVICES": "4"
             },
             "args": [
-                "--dataroot", "xxx",
+                "--dataroot", "/data/medical/cardiac/cta2mbf/data_114_20210318/5.mbf_myocardium",
                 "--model", "pix2pix_3d", 
                 "--input_nc", "1", 
                 "--output_nc", "1", 

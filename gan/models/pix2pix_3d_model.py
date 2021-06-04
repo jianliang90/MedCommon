@@ -145,7 +145,7 @@ class Pix2Pix3DModel(BaseModel):
                 axial_name = '{}_axial'.format(name)
                 axial_tensor = tensor[:,:,tensor.shape[-3]//3,:,:]
                 # visual_ret[name] = getattr(self, name)
-                visual_ret[coronal_name] = coronal_tensor
+                # visual_ret[coronal_name] = coronal_tensor
                 # visual_ret[sagital_name] = sagital_tensor
-                # visual_ret[axial_name] = axial_tensor
+                visual_ret[axial_name] = axial_tensor
         return visual_ret

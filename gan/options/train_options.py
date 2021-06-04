@@ -44,5 +44,13 @@ class TrainOptions(BaseOptions):
                             help='number of distributed processes')
         parser.add_argument('--dist-url', default='env://', help='url used to set up distributed training')
 
+        # add 
+        parser.add_argument('--crop_size', nargs='+', type=int, default=[128,128,128])
+        parser.add_argument('--aug', default='GAN')
+        parser.add_argument('--src_ww_wl', nargs='+', type=int, default=[400, 40])
+        parser.add_argument('--dst_ww_wl', nargs='+', type=int, default=[150, 75])
+        parser.add_argument('--dst_vis_lut', default=None)
+        parser.add_argument('--src_pattern', default='cropped_cta.nii.gz')
+        parser.add_argument('--dst_pattern', default='cropped_mbf.nii.gz')
         self.isTrain = True
         return parser
