@@ -16,12 +16,15 @@ from models.pix2pix_3d_model import Pix2Pix3DModel
 sys.path.append(os.path.join(os.path.dirname(__file__), os.path.pardir, os.path.pardir))
 from common.common_base_datasets import CommonSegmentationDS
 from utils.distributed_utils import DistributedUtils
+from utils.image_show_utils import ImageShowUtils
+from utils.metrics_utils import MetricsUtils
 
 from datasets.common_ds import GAN_COMMON_DS, get_common_transform
 
 import numpy as np
 import SimpleITK as sitk
 from tqdm import tqdm
+import pandas as pd
 
 class GANTrainer:
     def __init__(self) -> None:
@@ -196,7 +199,97 @@ class GANTrainer:
             sitk.WriteImage(real_img_a, os.path.join(out_sub_dir, 'real_a.nii.gz'))
             sitk.WriteImage(real_img_b, os.path.join(out_sub_dir, 'real_b.nii.gz'))
             sitk.WriteImage(fake_img_b, os.path.join(out_sub_dir, 'fake_b.nii.gz'))        
-        
+
+    @staticmethod
+    def export_slicemap_onecase(data_root, out_root, 
+            src_ww=150, src_wl=75, dst_ww=150, dst_wl=75, 
+            src_lut=None, dst_lut='jet'
+        ):
+        real_a_file = os.path.join(data_root, 'real_a.nii.gz')
+        real_b_file = os.path.join(data_root, 'real_b.nii.gz')
+        fake_b_file = os.path.join(data_root, 'fake_b.nii.gz')
+
+        real_a_img = sitk.ReadImage(real_a_file)
+        real_b_img = sitk.ReadImage(real_b_file)
+        fake_b_img = sitk.ReadImage(fake_b_file)
+
+        real_a_arr = sitk.GetArrayFromImage(real_a_img)
+        real_b_arr = sitk.GetArrayFromImage(real_b_img)
+        fake_b_arr = sitk.GetArrayFromImage(fake_b_img)
+
+        ImageShowUtils.save_volume_to_jpg(real_a_arr, os.path.join(out_root, 'real_a'), src_ww, src_wl, axis=0, file_prefix='x', reverse=False, lut_name=src_lut)
+        ImageShowUtils.save_volume_to_jpg(real_b_arr, os.path.join(out_root, 'real_b'), dst_ww, dst_wl, axis=0, file_prefix='x', reverse=False, lut_name=dst_lut)
+        ImageShowUtils.save_volume_to_jpg(fake_b_arr, os.path.join(out_root, 'fake_b'), dst_ww, dst_wl, axis=0, file_prefix='x', reverse=False, lut_name=dst_lut)
+
+    @staticmethod
+    def export_slicemap_singletask(data_root, out_root, suids,
+            src_ww=150, src_wl=75, dst_ww=150, dst_wl=75, 
+            src_lut=None, dst_lut='jet'
+        ):
+        for suid in tqdm(suids):
+            try:
+                sub_data_root = os.path.join(data_root, suid)
+                sub_out_root = os.path.join(out_root, suid)
+                GANTrainer.export_slicemap_onecase(sub_data_root, sub_out_root, 
+                    src_ww, src_wl, dst_ww, dst_wl, src_lut, dst_lut)
+            except Exception as e:
+                print('====> Error case:\t{}'.format(suid))
+                print(e)
+
+    @staticmethod
+    def export_slicemap_multiprocessing(data_root, out_root, 
+            src_ww=150, src_wl=75, dst_ww=150, dst_wl=75, 
+            src_lut=None, dst_lut='jet',
+            process_num=6
+        ):
+        series_uids = []
+        series_uids = os.listdir(data_root)
+
+        # print(series_uids)
+        num_per_process = (len(series_uids) + process_num - 1)//process_num
+
+        # this for single thread to debug
+        # GANTrainer.export_slicemap_singletask(data_root, out_root, series_uids, src_ww, src_wl, dst_ww, dst_wl, src_lut, dst_lut)
+
+        # this for run 
+        import multiprocessing
+        from multiprocessing import Process
+        multiprocessing.freeze_support()
+
+        pool = multiprocessing.Pool()
+
+        results = []
+
+        print(len(series_uids))
+        for i in range(process_num):
+            sub_series_uids = series_uids[num_per_process*i:min(num_per_process*(i+1), len(series_uids))]
+            print(len(sub_series_uids))
+            result = pool.apply_async(GANTrainer.export_slicemap_singletask, 
+                args=(data_root, out_root, sub_series_uids, src_ww, src_wl, dst_ww, dst_wl, src_lut, dst_lut))
+            results.append(result)
+
+        pool.close()
+        pool.join()
+
+
+    @staticmethod
+    def calc_mae(
+            data_root='/data/medical/cardiac/cta2mbf/data_66_20210517/6.inference_384x384x160_eval', 
+            out_dir = '/data/medical/cardiac/cta2mbf/data_66_20210517/7.analysis_result', 
+            out_file = 'mae_384x384x160_eval.csv'
+        ):
+        row_elems = []
+        for suid in tqdm(os.listdir(data_root)):
+            sub_data_root = os.path.join(data_root, suid)
+            real_b_file = os.path.join(sub_data_root, 'real_b.nii.gz')
+            fake_b_file = os.path.join(sub_data_root, 'fake_b.nii.gz') 
+            _, mae = MetricsUtils.calc_mae_with_file(real_b_file, fake_b_file)
+            row_elems.append(np.array([suid, mae]))
+        df = pd.DataFrame(np.array(row_elems), columns=['suid', 'mae'])
+        os.makedirs(out_dir, exist_ok=True)
+        out_file = os.path.join(out_dir, out_file)
+        df.to_csv(out_file)
+
     
 
 def train():
@@ -260,15 +353,15 @@ def inference(data_root, out_root, weights):
     GANTrainer.inference_batch(model.cuda(), data_root, out_root, opt)
 
 if __name__ == '__main__':
-    # train()
+    train()
     # test_load_model()
     # inference(
     #         '/data/medical/cardiac/cta2mbf/data_140_20210602/5.mbf_myocardium', 
     #         '/data/medical/cardiac/cta2mbf/data_140_20210602/6.inference_352x352x160_eval', 
     #         '/data/medical/cardiac/cta2mbf/data_114_20210318/checkpoints/cta2mbf/90_net_G.pth'
     #     )
-    inference(
-            '/data/medical/cardiac/cta2mbf/data_140_20210602/5.mbf_myocardium', 
-            '/data/medical/cardiac/cta2mbf/data_140_20210602/6.inference_352x352x160_train', 
-            '/home/zhangwd/code/work/MedCommon/gan/unit_test/checkpoints/bk/train_latest/1140_net_G.pth'
-        )
+    # inference(
+    #         '/data/medical/cardiac/cta2mbf/data_140_20210602/5.mbf_myocardium', 
+    #         '/data/medical/cardiac/cta2mbf/data_140_20210602/6.inference_352x352x160_train', 
+    #         '/home/zhangwd/code/work/MedCommon/gan/unit_test/checkpoints/bk/train_latest/1140_net_G.pth'
+    #     )
