@@ -87,6 +87,12 @@ class Pix2Pix3DModel(BaseModel):
         self.real_A = input['A' if AtoB else 'B'].to(self.device)
         self.real_B = input['B' if AtoB else 'A'].to(self.device)
         self.image_paths = input['A_paths' if AtoB else 'B_paths']
+        self.mask = None
+        if 'mask' in input:
+            self.loss_names.append('G_L1_Mask')
+            self.mask = input['mask'].to(self.device)
+            if 'mask_label' in input:
+                self.mask_label = input['mask_label']
 
     def forward(self):
         """Run forward pass; called by both functions <optimize_parameters> and <test>."""
@@ -116,6 +122,12 @@ class Pix2Pix3DModel(BaseModel):
         self.loss_G_L1 = self.criterionL1(self.fake_B, self.real_B) * self.opt.lambda_L1
         # combine loss and calculate gradients
         self.loss_G = self.loss_G_GAN + self.loss_G_L1
+        # Third, Mask
+        if self.mask is not None:
+            self.mask = (self.mask == self.mask_label)
+            self.loss_G_L1_Mask = (torch.nn.L1Loss(reduction='none')(self.fake_B, self.real_B) * self.mask).sum() / (self.mask.sum()+1e-6)
+            self.loss_G_L1_Mask *= self.opt.lambda_L1_Mask
+            self.loss_G += self.loss_G_L1_Mask
         self.loss_G.backward()
 
     def optimize_parameters(self):

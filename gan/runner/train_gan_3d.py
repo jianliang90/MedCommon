@@ -39,8 +39,8 @@ class GANTrainer:
         dataset_size = len(dataloader) 
         for index, (subjects) in enumerate(dataloader):
             iter_start_time = time.time()  # timer for computation per iteration
-            if total_iters % opt.print_freq == 0:
-                t_data = iter_start_time - iter_data_time
+            # if total_iters % opt.print_freq == 0:
+            t_data = iter_start_time - iter_data_time
 
             total_iters += opt.batch_size * DistributedUtils.get_world_size()
             epoch_iter += opt.batch_size * DistributedUtils.get_world_size()
@@ -52,6 +52,10 @@ class GANTrainer:
             input['B'] = real_b
             input['A_paths'] = 'A'
             input['B_paths'] = 'B'
+            if opt.mask_pattern:
+                mask = subjects['mask']['data']
+                input['mask'] = mask
+                input['mask_label'] = opt.mask_label
             model.set_input(input)
             model.optimize_parameters()
             
@@ -114,6 +118,7 @@ class GANTrainer:
         netG = model.netG.module
         netG.load_state_dict(torch.load(weights_G, map_location='cpu'))
         return netG
+        # return model
 
     @staticmethod
     def inference_onecase(model, series_path, crop_size = [128, 128, 128], out_root=None, opts=None):
@@ -148,6 +153,10 @@ class GANTrainer:
             src_pattern
             dst_pattern
         '''
+        if opts.inference_mode == 'train':
+            model.train()
+        else:
+            model.eval()
         transform = get_common_transform(opts.crop_size,'GAN_INFERENCE')
         ds = GAN_COMMON_DS(data_root, opts.src_pattern, opts.dst_pattern, opts.crop_size, transform)
         dataloader = DataLoader(ds, batch_size=1, num_workers=2, shuffle=True, pin_memory=True)
@@ -155,13 +164,14 @@ class GANTrainer:
         for index, (subjects) in tqdm(enumerate(dataloader)):
             real_a = subjects['src']['data'].float()
             real_b = subjects['dst']['data'].float()
-            input = {}
-            input['A'] = real_a
-            input['B'] = real_b
-            input['A_paths'] = 'A'
-            input['B_paths'] = 'B'
-            model.set_input(input)
-            fake_b = model.netG(real_a.cuda())
+            # input = {}
+            # input['A'] = real_a
+            # input['B'] = real_b
+            # input['A_paths'] = 'A'
+            # input['B_paths'] = 'B'
+            # model.set_input(input)
+            # fake_b = model.netG(real_a.cuda())
+            fake_b = model(real_a.cuda())
             fake_b = fake_b.detach().squeeze().cpu().numpy()
             real_a = real_a.squeeze().cpu().numpy()
             real_b = real_b.squeeze().cpu().numpy()
@@ -199,7 +209,7 @@ def train():
     data_root = opt.dataroot
     crop_size = opt.crop_size
     transform = get_common_transform(crop_size, opt.aug)
-    ds = GAN_COMMON_DS(data_root, opt.src_pattern, opt.dst_pattern, crop_size, transform)
+    ds = GAN_COMMON_DS(data_root, opt.src_pattern, opt.dst_pattern, crop_size, transform, opt.mask_pattern)
     dataloader = DataLoader(ds, batch_size=1, num_workers=2, shuffle=True, pin_memory=True)
     dataset_size = len(dataloader)    # get the number of images in the dataset.
     
@@ -251,4 +261,14 @@ def inference(data_root, out_root, weights):
 
 if __name__ == '__main__':
     # train()
-    test_load_model()
+    # test_load_model()
+    # inference(
+    #         '/data/medical/cardiac/cta2mbf/data_140_20210602/5.mbf_myocardium', 
+    #         '/data/medical/cardiac/cta2mbf/data_140_20210602/6.inference_352x352x160_eval', 
+    #         '/data/medical/cardiac/cta2mbf/data_114_20210318/checkpoints/cta2mbf/90_net_G.pth'
+    #     )
+    inference(
+            '/data/medical/cardiac/cta2mbf/data_140_20210602/5.mbf_myocardium', 
+            '/data/medical/cardiac/cta2mbf/data_140_20210602/6.inference_352x352x160_train', 
+            '/home/zhangwd/code/work/MedCommon/gan/unit_test/checkpoints/bk/train_latest/1140_net_G.pth'
+        )

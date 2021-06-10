@@ -55,10 +55,11 @@ def get_common_transform(image_shape, type='GAN'):
     return default_transform 
 
 class GAN_COMMON_DS(Dataset):
-    def __init__(self, data_root, src_pattern, dst_pattern, image_shape, transforms=None):
+    def __init__(self, data_root, src_pattern, dst_pattern, image_shape, transforms=None, mask_pattern=None):
         self.data_root = data_root
         self.src_pattern = src_pattern
         self.dst_pattern = dst_pattern
+        self.mask_pattern = mask_pattern
 
         if transforms:
             self.transforms = transforms
@@ -87,10 +88,13 @@ class GAN_COMMON_DS(Dataset):
 
         src_files = []
         dst_files = []
+        mask_files = []
         subjects = []
         for pid in pids:
             src_file = os.path.join(data_root, str(pid), src_pattern)
             dst_file = os.path.join(data_root, str(pid), dst_pattern)
+            if self.mask_pattern:
+                mask_file = os.path.join(data_root, str(pid), self.mask_pattern)
             exist = True
             if not os.path.isfile(src_file):
                 print('====> {} not exist!'.format(src_file))
@@ -98,15 +102,26 @@ class GAN_COMMON_DS(Dataset):
             if not os.path.isfile(dst_file):
                 print('====> {} not exist!'.format(dst_file))
                 exist = False
+            if self.mask_pattern and not os.path.isfile(mask_file):
+                print('====> {} not exist!'.format(mask_file))
+                exist = False
             if not exist:
                 continue
             src_files.append(src_file)
             dst_files.append(dst_file)
+            if self.mask_pattern:
+                mask_files.append(mask_file)
 
-        for (src, dst) in zip(src_files, dst_files):
-            subject = tio.Subject(src=tio.ScalarImage(src), dst=tio.LabelMap(dst))
-            # subject = tio.Subject(src=tio.ScalarImage(src), dst=tio.ScalarImage(dst))
-            subjects.append(subject)
+
+        if self.mask_pattern:
+            for (src, dst, mask) in zip(src_files, dst_files, mask_files):
+                subject = tio.Subject(src=tio.ScalarImage(src), dst=tio.LabelMap(dst), mask=tio.LabelMap(mask))
+                subjects.append(subject)            
+        else:
+            for (src, dst) in zip(src_files, dst_files):
+                subject = tio.Subject(src=tio.ScalarImage(src), dst=tio.LabelMap(dst))
+                # subject = tio.Subject(src=tio.ScalarImage(src), dst=tio.ScalarImage(dst))
+                subjects.append(subject)
 
         self.subjects_dataset = tio.SubjectsDataset(subjects, transform=self.transforms)
 

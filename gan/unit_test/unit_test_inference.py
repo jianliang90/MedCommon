@@ -118,7 +118,8 @@ def export_slicemap(
 
 def calc_mae(
         data_root='/data/medical/cardiac/cta2mbf/data_66_20210517/6.inference_384x384x160_eval', 
-        out_dir = '/data/medical/cardiac/cta2mbf/data_66_20210517/7.analysis_result'
+        out_dir = '/data/medical/cardiac/cta2mbf/data_66_20210517/7.analysis_result', 
+        out_file = 'mae_384x384x160_eval.csv'
     ):
     row_elems = []
     for suid in tqdm(os.listdir(data_root)):
@@ -129,10 +130,20 @@ def calc_mae(
         row_elems.append(np.array([suid, mae]))
     df = pd.DataFrame(np.array(row_elems), columns=['inhale_suid', 'mae'])
     os.makedirs(out_dir, exist_ok=True)
-    out_file = os.path.join(out_dir, 'mae_384x384x160_eval.csv')
+    out_file = os.path.join(out_dir, out_file)
     df.to_csv(out_file)
 
 
 if __name__ == '__main__':
     # inference()
-    calc_mae()
+    # calc_mae()
+    # calc_mae(
+    #     data_root='/data/medical/cardiac/cta2mbf/data_140_20210602/6.inference_352x352x160_eval', 
+    #     out_dir = '/data/medical/cardiac/cta2mbf/data_140_20210602/7.analysis_result', 
+    #     out_file = 'mae_352x352x160_eval.csv'
+    # )
+    calc_mae(
+        data_root='/data/medical/cardiac/cta2mbf/data_140_20210602/6.inference_352x352x160_train', 
+        out_dir = '/data/medical/cardiac/cta2mbf/data_140_20210602/7.analysis_result', 
+        out_file = 'mae_352x352x160_train.csv'
+    )

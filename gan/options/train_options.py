@@ -52,5 +52,9 @@ class TrainOptions(BaseOptions):
         parser.add_argument('--dst_vis_lut', default=None)
         parser.add_argument('--src_pattern', default='cropped_cta.nii.gz')
         parser.add_argument('--dst_pattern', default='cropped_mbf.nii.gz')
+        parser.add_argument('--mask_pattern', default=None)
+        parser.add_argument('--mask_label', type=int, default=1)
+        parser.add_argument('--lambda_L1_Mask', type=float, default=0.05, help='weight for L1 Mask loss')
+        parser.add_argument('--inference_mode', default='eval')
         self.isTrain = True
         return parser
