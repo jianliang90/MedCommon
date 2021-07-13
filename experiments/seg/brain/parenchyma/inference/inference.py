@@ -13,6 +13,6 @@ def load_inference_opts():
     opts.num_classes = 2
     opts.base_n_filter = 6
     opts.dynamic_size = [256, 256, 256]
-    opts.weights = '/data/medical/cardiac/chamber/seg/chamber_256/checkpoints/chamber/common_seg_epoch_19_train_0.067'
+    opts.weights = '/data/medical/brain/cerebral_parenchyma/exp/ct_256/checkpoints/parenchyma/common_seg_epoch_7_train_0.012'
 
     return opts
