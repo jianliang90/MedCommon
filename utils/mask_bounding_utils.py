@@ -113,6 +113,28 @@ class MaskBoundingUtils:
             os.makedirs(os.path.dirname(out_mask_file), exist_ok=True)
             sitk.WriteImage(out_sitk_mask, out_mask_file)
 
+    '''
+    extract images region from z-min to z-max
+    '''
+    @staticmethod
+    def extract_target_area_by_mask_zboundary(in_image, in_mask, padding=0):
+        mask_arr = sitk.GetArrayFromImage(in_mask)
+        z_min, y_min, x_min, z_max, y_max, x_max = MaskBoundingUtils.extract_mask_arr_bounding(mask_arr)
+        z_min = max(0, z_min-padding)
+        z_max = z_max+padding        
+        image_arr = sitk.GetArrayFromImage(in_image)
+        out_image_arr = image_arr[z_min:z_max+1]
+        out_image = sitk.GetImageFromArray(out_image_arr)
+        out_image.SetDirection(in_image.GetDirection())
+        out_image.SetSpacing(in_image.GetSpacing())
+        out_image.SetOrigin(in_image.GetOrigin())
+        
+        mask_arr = sitk.GetArrayFromImage(in_mask)
+        out_mask_arr = mask_arr[z_min:z_max+1]
+        out_mask = sitk.GetImageFromArray(out_mask_arr)
+        out_mask.CopyInformation(out_image)
+
+        return out_image, out_mask
 
     @staticmethod
     def fix_mask_sitk_info(root='/data/medical/lung/airway/segmentation'):
@@ -131,6 +153,21 @@ class MaskBoundingUtils:
             sitk.WriteImage(mask, out_mask_file)
 
 
+def test_extract_target_area_by_mask_zboundary():
+    image_file = '/data/medical/brain/gan/cta2dwi_multi_classified/3.sorted_mask/5016897/CTA/CTA.nii.gz'
+    mask_file = '/data/medical/brain/gan/cta2dwi_multi_classified/3.sorted_mask/5016897/CTA/CTA_MASK_connected.nii.gz'
+    in_image = sitk.ReadImage(image_file)
+    in_mask = sitk.ReadImage(mask_file)
+    out_image, out_mask = MaskBoundingUtils.extract_target_area_by_mask_zboundary(in_image, in_mask)
+    out_dir = '/data/medical/tmp/5016897'
+    os.makedirs(out_dir, exist_ok=True)
+    out_image_file = os.path.join(out_dir, 'image.nii.gz')
+    sitk.WriteImage(out_image, out_image_file)
+    out_mask_file = os.path.join(out_dir, 'mask.nii.gz')
+    sitk.WriteImage(out_mask, out_mask_file)
+
+
 
 if __name__ == '__main__':
     print(__file__)
+    test_extract_target_area_by_mask_zboundary()
