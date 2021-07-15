@@ -20,3 +20,12 @@ class MaskUtils:
                 mask_arr[mask_arr != mask_label] = 0
                 mask_arr[mask_arr == mask_label] = 1  
         return mask_arr  
+
+    @staticmethod
+    def fill_hole(in_mask, radius=8):
+        filter = sitk.VotingBinaryHoleFillingImageFilter()
+        filter.SetBackgroundValue(0)
+        filter.SetForegroundValue(1)
+        filter.SetRadius(radius)
+        out_mask = filter.Execute(in_mask)
+        return out_mask    
