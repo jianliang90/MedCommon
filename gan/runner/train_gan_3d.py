@@ -310,7 +310,7 @@ def train():
     model.setup(opt)
     visualizer = Visualizer(opt)
     total_iters = 0                # the total number of training iterations
-    print(model.netD)    
+    print(model.netG)    
 
     for epoch in range(opt.epoch_count, opt.n_epochs + opt.n_epochs_decay + 1):    # outer loop for different epochs; we save the model by <epoch_count>, <epoch_count>+<save_latest_freq>
         total_iters = GANTrainer.train_one_epoch(model, dataloader, visualizer, total_iters, epoch, opt)

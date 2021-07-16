@@ -19,8 +19,8 @@ def get_common_transform(image_shape, type='GAN'):
             tio.RandomFlip(axes=[0,1,2]), 
             tio.RandomAnisotropy(downsampling=(1,2.5),scalars_only=False,p=0.25),              # make images look anisotropic 25% of times
             tio.OneOf({                                # either
-                tio.RandomCropOrPad((image_shape[0], image_shape[1], image_shape[2])): 0.8,
-                tio.CropOrPad((image_shape[0], image_shape[1], image_shape[2])):0.2,   # or random elastic deformation
+                tio.RandomCropOrPad((image_shape[0], image_shape[1], image_shape[2]), padding_mode=-1024): 0.8,
+                tio.CropOrPad((image_shape[0], image_shape[1], image_shape[2]), padding_mode=-1024):0.2,   # or random elastic deformation
             }),
             tio.RandomBlur(p=0.25),                    # blur 25% of times
             tio.RandomNoise(p=0.25)

@@ -67,3 +67,4 @@ train_gan_3d.py \
 --dst_pattern BXXX.nii.gz \
 --dst_ww_wl 400 200 \
 # --continue_train
+

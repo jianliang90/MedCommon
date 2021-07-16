@@ -56,5 +56,11 @@ class TrainOptions(BaseOptions):
         parser.add_argument('--mask_label', type=int, default=1)
         parser.add_argument('--lambda_L1_Mask', type=float, default=0.05, help='weight for L1 Mask loss')
         parser.add_argument('--inference_mode', default='eval')
+        # add ssl
+        parser.add_argument('--ssl_sr', action='store_true', help='train with super resolution')
+        parser.add_argument('--ssl_arch', default='resnet10')
+        parser.add_argument('--ssl_pretrained_file', default=None)
+        # add remove discriminator
+        parser.add_argument('--no_discriminator', action='store_true')
         self.isTrain = True
         return parser

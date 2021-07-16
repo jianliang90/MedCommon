@@ -8,6 +8,11 @@ import torch.distributed as dist
 from base_model import BaseModel
 import gan_networks as networks
 
+ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), os.path.pardir, os.path.pardir))
+sys.path.append(ROOT)
+
+from utils.ssl_utils import SSL_Utils
+
 class Pix2Pix3DModel(BaseModel):
     """ This class implements the pix2pix model, for learning a mapping from input images to output images given paired data.
 
@@ -49,11 +54,14 @@ class Pix2Pix3DModel(BaseModel):
         """
         BaseModel.__init__(self, opt)
         # specify the training losses you want to print out. The training/test scripts will call <BaseModel.get_current_losses>
-        self.loss_names = ['G_GAN', 'G_L1', 'D_real', 'D_fake']
+        self.loss_names = ['G_GAN', 'G_L1']
+        if not self.opt.no_discriminator:
+            self.loss_names.append('D_real')
+            self.loss_names.append('D_fake')
         # specify the images you want to save/display. The training/test scripts will call <BaseModel.get_current_visuals>
         self.visual_names = ['real_A', 'fake_B', 'real_B']
         # specify the models you want to save to the disk. The training/test scripts will call <BaseModel.save_networks> and <BaseModel.load_networks>
-        if self.isTrain:
+        if self.isTrain and not opt.no_discriminator:
             self.model_names = ['G', 'D']
         else:  # during test time, only load G
             self.model_names = ['G']
@@ -61,7 +69,7 @@ class Pix2Pix3DModel(BaseModel):
         self.netG = networks.define_G(opt.input_nc, opt.output_nc, opt.ngf, opt.netG, opt.norm,
                                       not opt.no_dropout, opt.init_type, opt.init_gain, self.gpu_ids, opt)
 
-        if self.isTrain:  # define a discriminator; conditional GANs need to take both input and output images; Therefore, #channels for D is input_nc + output_nc
+        if self.isTrain and not opt.no_discriminator:  # define a discriminator; conditional GANs need to take both input and output images; Therefore, #channels for D is input_nc + output_nc
             self.netD = networks.define_D(opt.input_nc + opt.output_nc, opt.ndf, opt.netD,
                                           opt.n_layers_D, opt.norm, opt.init_type, opt.init_gain, self.gpu_ids, opt)
 
@@ -71,9 +79,16 @@ class Pix2Pix3DModel(BaseModel):
             self.criterionL1 = torch.nn.L1Loss()
             # initialize optimizers; schedulers will be automatically created by function <BaseModel.setup>.
             self.optimizer_G = torch.optim.Adam(self.netG.parameters(), lr=opt.lr, betas=(opt.beta1, 0.999))
-            self.optimizer_D = torch.optim.Adam(self.netD.parameters(), lr=opt.lr, betas=(opt.beta1, 0.999))
             self.optimizers.append(self.optimizer_G)
-            self.optimizers.append(self.optimizer_D)
+            if not opt.no_discriminator:
+                self.optimizer_D = torch.optim.Adam(self.netD.parameters(), lr=opt.lr, betas=(opt.beta1, 0.999))            
+                self.optimizers.append(self.optimizer_D)
+            if opt.ssl_sr:
+                if self.opt.ssl_arch is not None and self.opt.ssl_pretrained_file is not None:
+                    self.features_extractor = SSL_Utils.load_ssl_model(self.opt.ssl_arch, self.opt.ssl_pretrained_file)
+                    self.features_extractor = torch.nn.Sequential(*list(self.features_extractor.children())[:1])
+                    self.features_extractor.to(self.device)
+                    self.loss_names.append('SR')
 
     def set_input(self, input):
         """Unpack input data from the dataloader and perform necessary pre-processing steps.
@@ -116,8 +131,11 @@ class Pix2Pix3DModel(BaseModel):
         """Calculate GAN and L1 loss for the generator"""
         # First, G(A) should fake the discriminator
         fake_AB = torch.cat((self.real_A, self.fake_B), 1)
-        pred_fake = self.netD(fake_AB)
-        self.loss_G_GAN = self.criterionGAN(pred_fake, True)
+        if not self.opt.no_discriminator:
+            pred_fake = self.netD(fake_AB)
+            self.loss_G_GAN = self.criterionGAN(pred_fake, True)
+        else:
+            self.loss_G_GAN = 0
         # Second, G(A) = B
         self.loss_G_L1 = self.criterionL1(self.fake_B, self.real_B) * self.opt.lambda_L1
         # combine loss and calculate gradients
@@ -128,17 +146,24 @@ class Pix2Pix3DModel(BaseModel):
             self.loss_G_L1_Mask = (torch.nn.L1Loss(reduction='none')(self.fake_B, self.real_B) * self.mask).sum() / (self.mask.sum()+1e-6)
             self.loss_G_L1_Mask *= self.opt.lambda_L1_Mask
             self.loss_G += self.loss_G_L1_Mask
+        if self.opt.ssl_sr:
+            with torch.no_grad():
+                real_B_cls = self.features_extractor(self.real_B)
+                fake_B_cls = self.features_extractor(self.fake_B)
+                self.loss_SR = torch.nn.L1Loss()(real_B_cls, fake_B_cls)
+                self.loss_G += self.loss_SR               
         self.loss_G.backward()
 
     def optimize_parameters(self):
         self.forward()                   # compute fake images: G(A)
         # update D
-        self.set_requires_grad(self.netD, True)  # enable backprop for D
-        self.optimizer_D.zero_grad()     # set D's gradients to zero
-        self.backward_D()                # calculate gradients for D
-        self.optimizer_D.step()          # update D's weights
-        # update G
-        self.set_requires_grad(self.netD, False)  # D requires no gradients when optimizing G
+        if not self.opt.no_discriminator:
+            self.set_requires_grad(self.netD, True)  # enable backprop for D
+            self.optimizer_D.zero_grad()     # set D's gradients to zero
+            self.backward_D()                # calculate gradients for D
+            self.optimizer_D.step()          # update D's weights
+            # update G
+            self.set_requires_grad(self.netD, False)  # D requires no gradients when optimizing G
         self.optimizer_G.zero_grad()        # set G's gradients to zero
         self.backward_G()                   # calculate graidents for G
         self.optimizer_G.step()             # udpate G's weights

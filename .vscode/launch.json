@@ -175,7 +175,45 @@
                 "--mask_label", "6"
             ]
         }, 
-        
+
+        {
+            "name": "common: gan pix2pix super resolution",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "cwd": "${fileDirname}",
+            "env": {
+                "CUDA_VISIBLE_DEVICES": "1"
+            },
+            "args": [
+                "--dataroot", "/data/medical/cardiac/cta2mbf/data_114_20210318/5.mbf_myocardium",
+                "--model", "pix2pix_3d", 
+                "--input_nc", "1", 
+                "--output_nc", "1", 
+                "--ngf", "32",
+                "--netG", "resnet_6blocks",
+                "--no_dropout",
+                "--netD", "pixel",
+                "--ndf", "8",
+                "--display_port", "8098", 
+                "--display_server", "10.100.37.21",
+                "--display_freq", "1", 
+                "--print_freq", "1",
+                "--lambda_L1", "1",
+                "--save_latest_freq", "5000",
+                "--crop_size", "32", "32", "32", 
+                "--src_pattern", "cropped_cta.nii.gz", 
+                "--dst_pattern", "cropped_mbf.nii.gz", 
+                // "--mask_pattern", "cropped_mask.nii.gz", 
+                "--mask_label", "1", 
+                "--no_discriminator", 
+                "--ssl_sr", 
+                "--ssl_arch", "resnet10", 
+                "--ssl_pretrained_file", "/data/medical/cardiac/cta2mbf/ssl/cropped_ori/checkpoints/mbf/resnet10/checkpoint_4520.pth.tar"
+            ]
+        },         
+
         {
             "name": "common: gan pix2pix inference",
             "type": "python",
