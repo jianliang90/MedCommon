@@ -19,6 +19,7 @@ checkpoints
 
 
 !experiments/seg/cardiac/chamber/checkpoints
+!experiments/seg/cardiac/coronary/checkpoints
 
 gan/unit_test/checkpoints
 
