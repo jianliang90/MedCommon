@@ -79,14 +79,14 @@
 # --ssl_pretrained_file /data/medical/cardiac/cta2mbf/ssl/cropped_ori/checkpoints/mbf/resnet10/checkpoint_4520.pth.tar \
 # --continue_train
 
-CUDA_VISIBLE_DEVICES=1,3,6,7 python -m torch.distributed.launch \
+CUDA_VISIBLE_DEVICES=6,7 python -m torch.distributed.launch \
 --master_addr='10.100.37.100' \
 --master_port='29505' \
---nproc_per_node=4 \
+--nproc_per_node=2 \
 --nnodes=1 \
 --use_env \
 train_gan_3d.py \
---dataroot /data/medical/cardiac/cta2mbf/data_150_20210628/5.mbf_myocardium \
+--dataroot /data/medical/cardiac/cta2mbf/data_yourname/5.mbf_myocardium \
 --model pix2pix_3d \
 --input_nc 1 \
 --output_nc 1 \
@@ -100,13 +100,13 @@ train_gan_3d.py \
 --display_port=8900 \
 --display_id=0 \
 --lambda_L1=1 \
---n_epochs=500 \
+--n_epochs=5000 \
 --display_freq=10 \
 --print_freq=10 \
 --save_epoch_freq=10 \
 --lr_policy cosine \
 --lr 1e-4 \
---checkpoints_dir /data/medical/cardiac/cta2mbf/data_150_20210628/checkpoints \
+--checkpoints_dir /data/medical/cardiac/cta2mbf/data_yourname/checkpoints \
 --name cta2mbf_sr \
 --crop_size 384 384 160 \
 --dst_vis_lut jet \
@@ -118,7 +118,7 @@ train_gan_3d.py \
 --no_discriminator \
 --ssl_sr \
 --ssl_arch resnet10 \
---ssl_pretrained_file /data/medical/cardiac/cta2mbf/ssl/cropped_ori/checkpoints/mbf/resnet10/checkpoint_9990.pth.tar \
+--ssl_pretrained_file /data/medical/cardiac/cta2mbf/ssl/cropped_ori/checkpoints/mbf/resnet10/mbf_ssl.pth.tar \
 --continue_train
 
 

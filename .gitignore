@@ -18,6 +18,8 @@ checkpoints
 */checkpoints
 
 
+!experiments/seg/cardiac/chamber/checkpoints
+
 gan/unit_test/checkpoints
 
 
