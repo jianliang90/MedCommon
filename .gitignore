@@ -20,6 +20,7 @@ checkpoints
 
 !experiments/seg/cardiac/chamber/checkpoints
 !experiments/seg/cardiac/coronary/checkpoints
+!experiments/seg/brain/parenchyma/checkpoints
 
 gan/unit_test/checkpoints
 
