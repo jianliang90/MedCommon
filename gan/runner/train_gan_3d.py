@@ -297,7 +297,8 @@ class GANTrainer:
             out_file = 'mae_384x384x160_eval.csv', 
             mask_root = None, 
             mask_pattern = 'cropped_mbf_mask.nii.gz', 
-            mask_label = 1
+            mask_label = 1,
+            crop_size = [384, 384, 160]
         ):
         row_elems = []
         for suid in tqdm(os.listdir(data_root)):
@@ -308,7 +309,15 @@ class GANTrainer:
             if mask_root:
                 mask_file = os.path.join(mask_root, suid, mask_pattern)
                 try:
-                    _, mask_mae = MetricsUtils.calc_mae_with_file(real_b_file, fake_b_file, mask_file=mask_file, mask_label=mask_label)
+                    subject = CommonSegmentationDS.get_inference_input(mask_file, crop_size)
+                    mask_arr = subject['src']['data']
+                    mask_arr = np.transpose(mask_arr, [2,1,0])
+                    mask_img = sitk.GetImageFromArray(mask_arr)
+                    real_img = sitk.ReadImage(real_b_file)
+                    mask_img.CopyInformation(real_img)
+                    tmp_mask_file = os.path.join(sub_data_root, 'tmp_mask.nii.gz')
+                    sitk.WriteImage(mask_img, tmp_mask_file)
+                    _, mask_mae = MetricsUtils.calc_mae_with_file(real_b_file, fake_b_file, mask_file=tmp_mask_file, mask_label=mask_label)
                 except:
                     mask_mae = -1
                 row_elems.append(np.array([suid, mae, mask_mae]))
@@ -395,8 +404,16 @@ if __name__ == '__main__':
     #         '/data/medical/cardiac/cta2mbf/data_140_20210602/6.inference_352x352x160_train', 
     #         '/home/zhangwd/code/work/MedCommon/gan/unit_test/checkpoints/bk/train_latest/1140_net_G.pth'
     #     )
-    inference(
-            '/ssd/zhangwd/cta2mbf/data_yourname/5.mbf_myocardium', 
-            '/ssd/zhangwd/cta2mbf/data_yourname/6.inference_384x384x160_train', 
-            '/ssd/zhangwd/cta2mbf/data_yourname/checkpoints/cta2mbf_sr/390_net_G.pth'
-        )
+    # inference(
+    #         '/ssd/zhangwd/cta2mbf/data_yourname/5.mbf_myocardium', 
+    #         '/ssd/zhangwd/cta2mbf/data_yourname/6.inference_384x384x160_train', 
+    #         '/ssd/zhangwd/cta2mbf/data_yourname/checkpoints/cta2mbf_sr/390_net_G.pth'
+    #     )
+    GANTrainer.calc_mae_with_mask(
+            data_root='/ssd/zhangwd/cta2mbf/data_yourname/6.inference_384x384x160_train', 
+            out_dir = '/ssd/zhangwd/cta2mbf/data_yourname/7.analysis_result', 
+            out_file = 'mae_384x384x160_eval.csv', 
+            mask_root = '/ssd/zhangwd/cta2mbf/data_yourname/5.train_batch_2d_parenchyma', 
+            mask_pattern = 'cropped_mbf_mask.nii.gz', 
+            mask_label = 1
+    )    
