@@ -305,7 +305,7 @@ class GANTrainer:
             sub_data_root = os.path.join(data_root, suid)
             real_b_file = os.path.join(sub_data_root, 'real_b.nii.gz')
             fake_b_file = os.path.join(sub_data_root, 'fake_b.nii.gz') 
-            _, mae = MetricsUtils.calc_mae_with_file(real_b_file, fake_b_file)
+            # _, mae = MetricsUtils.calc_mae_with_file(real_b_file, fake_b_file)
             if mask_root:
                 mask_file = os.path.join(mask_root, suid, mask_pattern)
                 try:
@@ -317,11 +317,13 @@ class GANTrainer:
                     mask_img.CopyInformation(real_img)
                     tmp_mask_file = os.path.join(sub_data_root, 'tmp_mask.nii.gz')
                     sitk.WriteImage(mask_img, tmp_mask_file)
-                    _, mask_mae = MetricsUtils.calc_mae_with_file(real_b_file, fake_b_file, mask_file=tmp_mask_file, mask_label=mask_label)
+                    mask_mae, mae = MetricsUtils.calc_mae_with_file(real_b_file, fake_b_file, mask_file=tmp_mask_file, mask_label=mask_label)
                 except:
                     mask_mae = -1
+                    mae = -1
                 row_elems.append(np.array([suid, mae, mask_mae]))
-            else: 
+            else:
+                _, mae = MetricsUtils.calc_mae_with_file(real_b_file, fake_b_file) 
                 row_elems.append(np.array([suid, mae]))
         if mask_root:
             df = pd.DataFrame(np.array(row_elems), columns=['suid', 'mae', 'mask_mae'])
