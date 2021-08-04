@@ -290,7 +290,37 @@ class GANTrainer:
         out_file = os.path.join(out_dir, out_file)
         df.to_csv(out_file)
 
-    
+    @staticmethod
+    def calc_mae_with_mask(
+            data_root='/data/medical/cardiac/cta2mbf/data_66_20210517/6.inference_384x384x160_eval', 
+            out_dir = '/data/medical/cardiac/cta2mbf/data_66_20210517/7.analysis_result', 
+            out_file = 'mae_384x384x160_eval.csv', 
+            mask_root = None, 
+            mask_pattern = 'cropped_mbf_mask.nii.gz', 
+            mask_label = 1
+        ):
+        row_elems = []
+        for suid in tqdm(os.listdir(data_root)):
+            sub_data_root = os.path.join(data_root, suid)
+            real_b_file = os.path.join(sub_data_root, 'real_b.nii.gz')
+            fake_b_file = os.path.join(sub_data_root, 'fake_b.nii.gz') 
+            _, mae = MetricsUtils.calc_mae_with_file(real_b_file, fake_b_file)
+            if mask_root:
+                mask_file = os.path.join(mask_root, suid, mask_pattern)
+                try:
+                    _, mask_mae = MetricsUtils.calc_mae_with_file(real_b_file, fake_b_file, mask_file=mask_file, mask_label=mask_label)
+                except:
+                    mask_mae = -1
+                row_elems.append(np.array([suid, mae, mask_mae]))
+            else: 
+                row_elems.append(np.array([suid, mae]))
+        if mask_root:
+            df = pd.DataFrame(np.array(row_elems), columns=['suid', 'mae', 'mask_mae'])
+        else:
+            df = pd.DataFrame(np.array(row_elems), columns=['suid', 'mae'])
+        os.makedirs(out_dir, exist_ok=True)
+        out_file = os.path.join(out_dir, out_file)
+        df.to_csv(out_file)    
 
 def train():
     opt = TrainOptions().parse()
@@ -353,7 +383,7 @@ def inference(data_root, out_root, weights):
     GANTrainer.inference_batch(model.cuda(), data_root, out_root, opt)
 
 if __name__ == '__main__':
-    train()
+    # train()
     # test_load_model()
     # inference(
     #         '/data/medical/cardiac/cta2mbf/data_140_20210602/5.mbf_myocardium', 
@@ -365,3 +395,8 @@ if __name__ == '__main__':
     #         '/data/medical/cardiac/cta2mbf/data_140_20210602/6.inference_352x352x160_train', 
     #         '/home/zhangwd/code/work/MedCommon/gan/unit_test/checkpoints/bk/train_latest/1140_net_G.pth'
     #     )
+    inference(
+            '/ssd/zhangwd/cta2mbf/data_yourname/5.mbf_myocardium', 
+            '/ssd/zhangwd/cta2mbf/data_yourname/6.inference_384x384x160_train', 
+            '/ssd/zhangwd/cta2mbf/data_yourname/checkpoints/cta2mbf_sr/390_net_G.pth'
+        )

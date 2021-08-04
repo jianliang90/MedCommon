@@ -1,7 +1,7 @@
 import os
 import sys
 import numpy as np
-import cv2
+# import cv2
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), os.path.pardir))
 sys.path.append(ROOT)
