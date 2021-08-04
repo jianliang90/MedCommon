@@ -60,6 +60,7 @@ class MetricsUtils:
         if image_mask:
             mask = sitk.GetArrayFromImage(image_mask)
             mask = MaskUtils.fix_mask_label(mask, mask_label=None)
+            mask = mask==mask_label
         else:
             mask = True
         return MetricsUtils.calc_mae(arr_a, arr_b, mask)
