@@ -310,7 +310,7 @@ class GANTrainer:
                 mask_file = os.path.join(mask_root, suid, mask_pattern)
                 try:
                     subject = CommonSegmentationDS.get_inference_input(mask_file, crop_size)
-                    mask_arr = subject['src']['data']
+                    mask_arr = subject['src']['data'][0]
                     mask_arr = np.transpose(mask_arr, [2,1,0])
                     mask_img = sitk.GetImageFromArray(mask_arr)
                     real_img = sitk.ReadImage(real_b_file)
