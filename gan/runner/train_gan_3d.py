@@ -415,7 +415,7 @@ if __name__ == '__main__':
             data_root='/ssd/zhangwd/cta2mbf/data_yourname/6.inference_384x384x160_train', 
             out_dir = '/ssd/zhangwd/cta2mbf/data_yourname/7.analysis_result', 
             out_file = 'mae_384x384x160_eval.csv', 
-            mask_root = '/ssd/zhangwd/cta2mbf/data_yourname/5.train_batch_2d_parenchyma', 
+            mask_root = '/ssd/zhangwd/cta2mbf/data_yourname/5.mbf_myocardium', 
             mask_pattern = 'cropped_mbf_mask.nii.gz', 
             mask_label = 1
     )    

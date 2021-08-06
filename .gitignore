@@ -23,6 +23,7 @@ checkpoints
 !experiments/seg/brain/parenchyma/checkpoints
 !experiments/seg/lung/airway/checkpoints
 !experiments/seg/lung/lung/checkpoints
+!gan/runner/checkpoints
 
 gan/unit_test/checkpoints
 
